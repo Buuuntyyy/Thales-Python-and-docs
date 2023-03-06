@@ -26,15 +26,12 @@ def order_octet(bit_array) -> list:
 #fonction permettant de lire les octets préalablement triés, dans un intervalle donné par leur index respectif
 def read_octet(bytes_array, num_octet_deb, num_octet_fin) -> list:
     octet = bytes_array[num_octet_deb:num_octet_fin]
-    print(f"octet = {octet}")
     #bin2deci(octet)
     return octet
 
 #permet de lire le fichiers en considérant des groupes de bits comme octet.
 def readBitsASoctet(liste, OctetDeb, OctetFin) -> list:#l'octet 1 se trouve à l'index 0
     toRead = liste[OctetDeb*8:OctetFin*8]
-    #toRead = toRead[::-1] #on inverse la liste pour avoir les bonnes puissances de 2
-    print(type(toRead))
     return toRead
 
 #convertit les octets en entrée en décimal et retourne cette valeur
@@ -51,11 +48,11 @@ def frame_date(liste) -> float:
     array = readBitsASoctet(liste, 8, 16)
     time = conv2dec(array)
     date_time = datetime.fromtimestamp(time)
-    print(date_time)
 
 #permet de lire la taille du paquet en octet
 def taille_paquet(liste) -> int:
     array = readBitsASoctet(liste, 24, 28)
+    array = array[::-1]
     return conv2dec(array)
 
 def lire_addr_mac(liste) -> int: #octet 28 à 40
@@ -80,7 +77,6 @@ def lire_addr_ip(liste) -> str: #octet 54 à 62
     addrIp1 = ""
     addrIp2 = ""
     bdata = readBitsASoctet(liste, 54, 62)
-    print(f"bdata = {bdata}")
     addresses = conv_ip(bdata)
     s_addr = addresses[0]
     d_addr = addresses[1]
@@ -111,7 +107,6 @@ def conv_ip(liste) -> tuple:
     for i in range(0, 4):
         val = 0
         inv = ipList[i][::-1]
-        print(f"octet : {inv}")
         for i in range(0, 8):
             if inv[i] == 1:
                 val += 2**i
@@ -120,7 +115,6 @@ def conv_ip(liste) -> tuple:
     for i in range(4, 8):
         val = 0
         inv = ipList[i][::-1]
-        print(f"octet : {inv}")
         for i in range(0, 8):
             if inv[i] == 1:
                 val += 2**i
@@ -181,7 +175,6 @@ def lire_fields(liste) -> list:
     fields.append(readBitsASoctet(liste, 82, 84)) #octet 83 et 84 === field 33
     fields.append(readBitsASoctet(liste, 84, 86)) #octets 85 et 86 === field 34 #83 à 88 = packet_date
     fields.append(readBitsASoctet(liste, 86, 88)) #octets 87 et 88 === field 35
-    print(fields)
 
     return fields
 
@@ -211,19 +204,15 @@ def bin2deci(liste) -> int:
     val = 0
     for octet in liste:
         inv = octet[::-1]
-        print(f"octet après : {inv}")
         for i in range(0, len()):
             if inv[i] == 1:
                 val += 2**i
-                print(f"val : {2**i}")
-                print(f"dans val on a : {val}")
     print(f"val = {val}")
     return val
 
 #permet de convertir 1 octet donné en hexadécimal, la liste en entrée doit être préalablement inversée
 def bin2hex(byte) -> str:
     chaine = ""
-    print(f"byte = {byte}")
     res1 = 0
 
     for i in range(0, len(byte), 4):
