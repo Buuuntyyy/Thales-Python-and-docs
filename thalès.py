@@ -57,7 +57,7 @@ def frame_date(liste) -> float:
 #permet de lire la taille du paquet en octet
 def taille_paquet(liste) -> int:
     array = readBitsASoctet(liste, 24, 28)
-    return conv2dec(array)
+    return conv2dec(array[::-1])
 
 def lire_addr_mac(liste) -> int: #octet 28 à 40
     bdata = readBitsASoctet(liste, 28, 40)
@@ -258,8 +258,12 @@ def extracteur() -> tuple:
 
 
 if __name__ == "__main__":
-    start = time.time()
-    print(extracteur())
-    end = time.time()
-    elapsed = end - start
-    print(elapsed)
+    moy = 0
+    for i in range(0, 100):
+        start = time.time()
+        print(extracteur())
+        end = time.time()
+        elapsed = end - start
+        print(elapsed)
+        moy += elapsed
+    print(moy/100)
