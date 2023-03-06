@@ -245,6 +245,7 @@ def extracteur() -> tuple:
         fields = lire_fields(file_bin, decalage)
         FT = lire_FT(file_bin, decalage)
         FT6 = lire_FT6(file_bin, fields)
+        print(size, macs, ips, FT, FT6)
 
     return size, macs, ips, date, FT, FT6
 
