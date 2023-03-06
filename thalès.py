@@ -51,7 +51,8 @@ def frame_date(liste) -> float:
 
 #permet de lire la taille du paquet en octet
 def taille_paquet(liste, decalage) -> int:
-    array = readBitsASoctet(liste, decalage + 24, decalage + 28)  
+    array = readBitsASoctet(liste, decalage + 24, decalage + 28)
+    print(array)
     array = array[::-1]
     return conv2dec(array)
 
@@ -59,8 +60,10 @@ def lire_addr_mac(liste, decalage) -> int: #octet 28 à 40
     bdata = readBitsASoctet(liste, decalage + 28, decalage + 40)
     #print(f"bdata = {bdata}")
     hex = bin2hex(bdata)
+    #print(hex)
     addr1 = hex[0:13]
     addr2 = hex[12:26]
+    #print(addr1, addr2)
     s_addr = ""
     d_addr = ""
 
@@ -214,6 +217,7 @@ def bin2deci(liste) -> int:
 def bin2hex(byte) -> str:
     chaine = ""
     res1 = 0
+    #print(f"byte : {byte}")
 
     for i in range(0, len(byte), 4):
         temp = byte[i:i+4]
@@ -234,6 +238,7 @@ def extracteur() -> tuple:
     path = "C:\\Users\\barfl\\Desktop\\saé_thalès\\ethernet.result_data"
     file_bin = read_binary_file_bits(path) #on garde le fichier binaire en mémoire pour rapidement y accéder et ne le lire qu'une seule fois
     decalage = 0 #on initialise la variable de decalage à 0
+    resultat = []
     #secondes = frame_date(file_bin)
     #il faut boucler sur toute la trame --> while True:
     #il faut aussi appliquer un decalage à chaque fonction de lecture sauf FT6
@@ -245,7 +250,11 @@ def extracteur() -> tuple:
         fields = lire_fields(file_bin, decalage)
         FT = lire_FT(file_bin, decalage)
         FT6 = lire_FT6(file_bin, fields)
-        print(size, macs, ips, FT, FT6)
+        decalage = decalage + size + 28
+        #print(size, macs, ips, FT, FT6)
+        #print(decalage)
+        resultat.append((size, macs, ips, FT, FT6))
+        print(resultat[0:10])
 
     return size, macs, ips, date, FT, FT6
 
