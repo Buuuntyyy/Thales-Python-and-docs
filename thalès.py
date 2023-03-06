@@ -1,5 +1,6 @@
 from datetime import datetime
 import binascii
+_resultat = []
 
 def read_binary_file_bits(path) -> list:
     with open(path, 'rb') as f:
@@ -238,7 +239,6 @@ def extracteur() -> tuple:
     path = "C:\\Users\\barfl\\Desktop\\saé_thalès\\ethernet.result_data"
     file_bin = read_binary_file_bits(path) #on garde le fichier binaire en mémoire pour rapidement y accéder et ne le lire qu'une seule fois
     decalage = 0 #on initialise la variable de decalage à 0
-    resultat = []
     #secondes = frame_date(file_bin)
     #il faut boucler sur toute la trame --> while True:
     #il faut aussi appliquer un decalage à chaque fonction de lecture sauf FT6
@@ -253,15 +253,25 @@ def extracteur() -> tuple:
         decalage = decalage + size + 28
         #print(size, macs, ips, FT, FT6)
         #print(decalage)
-        resultat.append((size, macs, ips, FT, FT6))
-        print(resultat[0:10])
-
-    return size, macs, ips, date, FT, FT6
+        _resultat.append((size, macs, ips, FT, FT6))
+        #print(resultat[0:10])
+        #print(len(_resultat))
+        #print(_resultat)
 
 
 if __name__ == "__main__":
-    print(extracteur())
+    try:
+        print(extracteur())
+    except IndexError:
+        print(len(_resultat))
+        print(_resultat)
 
+    fic = open("C:\\Users\\barfl\\Desktop\\saé_thalès\\atest.txt", "w")
+    for element in _resultat:
+        fic.write(str(element) + "\n")
+    fic.close()
+    print("fini")
+    print(_resultat[262])
 
 
 #ajouter du threading pour que la lecture soit plus rapide : diviser le fichier en 2 partie et gérer avec 2 threads différents
