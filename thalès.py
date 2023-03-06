@@ -251,3 +251,7 @@ def extracteur() -> tuple:
 
 if __name__ == "__main__":
     print(extracteur())
+
+
+
+#ajouter du threading pour que la lecture soit plus rapide : diviser le fichier en 2 partie et gérer avec 2 threads différents
