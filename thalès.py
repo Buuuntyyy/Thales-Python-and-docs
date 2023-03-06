@@ -47,19 +47,19 @@ def conv2dec(array) -> int:
     return res
 
 #nombre de seconde depuis 1 janvier 1970 --> passer en float double
-def frame_date(liste, decalage) -> float:
-    array = readBitsASoctet(liste, decalage + 8, decalage + 16)
+def frame_date(liste) -> float:
+    array = readBitsASoctet(liste, 8, 16)
     time = conv2dec(array)
     date_time = datetime.fromtimestamp(time)
     print(date_time)
 
 #permet de lire la taille du paquet en octet
-def taille_paquet(liste, decalage) -> int:
-    array = readBitsASoctet(liste, decalage + 24, decalage + 28)
+def taille_paquet(liste) -> int:
+    array = readBitsASoctet(liste, 24, 28)
     return conv2dec(array)
 
-def lire_addr_mac(liste, decalage) -> int: #octet 28 à 40
-    bdata = readBitsASoctet(liste, decalage + 28, decalage + 40)
+def lire_addr_mac(liste) -> int: #octet 28 à 40
+    bdata = readBitsASoctet(liste, 28, 40)
     #print(f"bdata = {bdata}")
     hex = bin2hex(bdata)
     addr1 = hex[0:13]
@@ -76,10 +76,10 @@ def lire_addr_mac(liste, decalage) -> int: #octet 28 à 40
 
     return s_addr, d_addr
 
-def lire_addr_ip(liste, decalage) -> str: #octet 54 à 62
+def lire_addr_ip(liste) -> str: #octet 54 à 62
     addrIp1 = ""
     addrIp2 = ""
-    bdata = readBitsASoctet(liste, decalage + 54, decalage + 62)
+    bdata = readBitsASoctet(liste, 54, 62)
     print(f"bdata = {bdata}")
     addresses = conv_ip(bdata)
     s_addr = addresses[0]
@@ -95,9 +95,9 @@ def lire_addr_ip(liste, decalage) -> str: #octet 54 à 62
     return addrIp1, addrIp2
 
 #lire packet date
-def packet_date(fields_liste, decalage):
+def packet_date(fields_liste):
     packet_dateListe = []
-    for i in range(decalage + 19, decalage + 22):
+    for i in range(19, 22):
         packet_dateListe.append(fields_liste[i])
 
 
@@ -245,15 +245,13 @@ def extracteur() -> tuple:
     path = "C:\\Users\\barfl\\Desktop\\saé_thalès\\ethernet.result_data"
     file_bin = read_binary_file_bits(path) #on garde le fichier binaire en mémoire pour rapidement y accéder et ne le lire qu'une seule fois
     #secondes = frame_date(file_bin)
-    while True:
-        size = taille_paquet(file_bin)
-        macs = lire_addr_mac(file_bin)
-        ips = lire_addr_ip(file_bin)
-        date = packet_date(file_bin)
-        fields = lire_fields(file_bin)
-        FT = lire_FT(file_bin)
-        FT6 = lire_FT6(file_bin, fields)
-        decalage += size
+    size = taille_paquet(file_bin)
+    macs = lire_addr_mac(file_bin)
+    ips = lire_addr_ip(file_bin)
+    date = packet_date(file_bin)
+    fields = lire_fields(file_bin)
+    FT = lire_FT(file_bin)
+    FT6 = lire_FT6(file_bin, fields)
 
     
 
