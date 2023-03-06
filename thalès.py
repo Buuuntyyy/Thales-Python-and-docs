@@ -158,14 +158,15 @@ def lire_fields(liste, decalage) -> list:
 
     #octets 76 à 77 (77 inclu seulement) : field 23, 25, 26
         #field 23 : 1 bit (5eme bit)
-    fields.append((liste[decalage +613]))
+    fields.append((liste[decalage +613:decalage +614]))
         #field 25 : 1 bit (7eme bit)
-    fields.append((liste[decalage +614]))
+    fields.append((liste[decalage +614:decalage +615]))
         #field 26 : 1 bit (8eme bit)
-    fields.append((liste[decalage +615]))
+    fields.append((liste[decalage +615:decalage +616]))
     #octets 77 à 78 (78 inclu seulement): field 27, 28
         #field 27 : 2 bits (2 premiers bits)
-    fields.append((liste[decalage +616:decalage +617]))
+    fields.append("here")
+    fields.append((liste[decalage +616:decalage +618]))
         #field 28 : 6 bits (6 derniers bits)
     fields.append((liste[decalage +618:decalage +623]))
     #octet 78 à 80 (79 et 80 inclus) : fields 29, 30
@@ -204,13 +205,13 @@ def lire_FT6(FT_liste, fields_liste) -> list:
     return FT6
 
 #permet de convertir un octet en décimal
-def bin2deci(liste) -> int:
+def bin2deci(octet) -> int:
     val = 0
-    for octet in liste:
-        inv = octet[::-1]
-        for i in range(0, len()):
-            if inv[i] == 1:
-                val += 2**i
+    #print(f"octet 2 = {octet} type : {type(octet)}")
+    inv = octet[::-1]
+    for i in range(0, len(inv)):
+        if inv[i] == 1:
+            val += 2**i
     #print(f"val = {val}")
     return val
 
@@ -237,12 +238,15 @@ def bin2hex(byte) -> str:
 
 def extracteur() -> tuple:
     path = "C:\\Users\\barfl\\Desktop\\saé_thalès\\ethernet.result_data"
-    file_bin = read_binary_file_bits(path) #on garde le fichier binaire en mémoire pour rapidement y accéder et ne le lire qu'une seule fois
+    path2 = "C:\\Users\\Utlisateur\\Desktop\\programmation\\thales\\ethernet.result_data"
+    file_bin = read_binary_file_bits(path2) #on garde le fichier binaire en mémoire pour rapidement y accéder et ne le lire qu'une seule fois
     decalage = 0 #on initialise la variable de decalage à 0
     #secondes = frame_date(file_bin)
     #il faut boucler sur toute la trame --> while True:
     #il faut aussi appliquer un decalage à chaque fonction de lecture sauf FT6
+
     while True:
+        fields_traduc = []
         size = taille_paquet(file_bin, decalage)
         macs = lire_addr_mac(file_bin, decalage)
         ips = lire_addr_ip(file_bin, decalage)
@@ -251,12 +255,15 @@ def extracteur() -> tuple:
         FT = lire_FT(file_bin, decalage)
         FT6 = lire_FT6(file_bin, fields)
         decalage = decalage + size + 28
-        #print(size, macs, ips, FT, FT6)
-        #print(decalage)
-        _resultat.append((size, macs, ips, FT, FT6))
-        #print(resultat[0:10])
-        #print(len(_resultat))
-        #print(_resultat)
+
+        for octet in fields:
+            #print(f"octet = {octet} type : {type(octet)}")
+            fields_traduc.append(bin2deci(octet))
+        print(len(fields_traduc))
+
+
+        _resultat.append((size, macs, ips, fields_traduc, FT, FT6))
+
 
 
 if __name__ == "__main__":
@@ -264,9 +271,8 @@ if __name__ == "__main__":
         print(extracteur())
     except IndexError:
         print(len(_resultat))
-        print(_resultat)
 
-    fic = open("C:\\Users\\barfl\\Desktop\\saé_thalès\\atest.txt", "w")
+    fic = open("C:\\Users\\Utlisateur\\Desktop\\programmation\\thales\\output.txt", "w")
     for element in _resultat:
         fic.write(str(element) + "\n")
     fic.close()
