@@ -1,5 +1,6 @@
 from datetime import datetime
 import binascii
+import time
 
 def read_binary_file_bits(path) -> list:
     with open(path, 'rb') as f:
@@ -26,7 +27,7 @@ def order_octet(bit_array) -> list:
 #fonction permettant de lire les octets préalablement triés, dans un intervalle donné par leur index respectif
 def read_octet(bytes_array, num_octet_deb, num_octet_fin) -> list:
     octet = bytes_array[num_octet_deb:num_octet_fin]
-    print(f"octet = {octet}")
+    #print(f"octet = {octet}")
     #bin2deci(octet)
     return octet
 
@@ -34,7 +35,7 @@ def read_octet(bytes_array, num_octet_deb, num_octet_fin) -> list:
 def readBitsASoctet(liste, OctetDeb, OctetFin) -> list:#l'octet 1 se trouve à l'index 0
     toRead = liste[OctetDeb*8:OctetFin*8]
     #toRead = toRead[::-1] #on inverse la liste pour avoir les bonnes puissances de 2
-    print(type(toRead))
+    #print(type(toRead))
     return toRead
 
 #convertit les octets en entrée en décimal et retourne cette valeur
@@ -51,7 +52,7 @@ def frame_date(liste) -> float:
     array = readBitsASoctet(liste, 8, 16)
     time = conv2dec(array)
     date_time = datetime.fromtimestamp(time)
-    print(date_time)
+    #print(date_time)
 
 #permet de lire la taille du paquet en octet
 def taille_paquet(liste) -> int:
@@ -72,7 +73,7 @@ def lire_addr_mac(liste) -> int: #octet 28 à 40
         d_addr += addr2[i:i+2] + ":"
     s_addr = s_addr[0:17]
     d_addr = d_addr[0:17]
-    print(f"adresses : addr1 = {s_addr}, addr2 = {d_addr}")
+    #print(f"adresses : addr1 = {s_addr}, addr2 = {d_addr}")
 
     return s_addr, d_addr
 
@@ -80,7 +81,7 @@ def lire_addr_ip(liste) -> str: #octet 54 à 62
     addrIp1 = ""
     addrIp2 = ""
     bdata = readBitsASoctet(liste, 54, 62)
-    print(f"bdata = {bdata}")
+    #print(f"bdata = {bdata}")
     addresses = conv_ip(bdata)
     s_addr = addresses[0]
     d_addr = addresses[1]
@@ -90,7 +91,7 @@ def lire_addr_ip(liste) -> str: #octet 54 à 62
         addrIp2 += str(element) + "."
     addrIp1 = addrIp1[0:13]
     addrIp2 = addrIp2[0:13]
-    print(addrIp1, addrIp2)
+    #print(addrIp1, addrIp2)
 
     return addrIp1, addrIp2
 
@@ -104,14 +105,14 @@ def packet_date(fields_liste):
 def conv_ip(liste) -> tuple:
     octet_val_ip1 = []
     ipList = order_octet(liste)
-    print(ipList)
+    #print(ipList)
     val = 0
     octet_val_ip2 = []
 
     for i in range(0, 4):
         val = 0
         inv = ipList[i][::-1]
-        print(f"octet : {inv}")
+        #print(f"octet : {inv}")
         for i in range(0, 8):
             if inv[i] == 1:
                 val += 2**i
@@ -120,7 +121,7 @@ def conv_ip(liste) -> tuple:
     for i in range(4, 8):
         val = 0
         inv = ipList[i][::-1]
-        print(f"octet : {inv}")
+        #print(f"octet : {inv}")
         for i in range(0, 8):
             if inv[i] == 1:
                 val += 2**i
@@ -181,7 +182,7 @@ def lire_fields(liste) -> list:
     fields.append(readBitsASoctet(liste, 82, 84)) #octet 83 et 84 === field 33
     fields.append(readBitsASoctet(liste, 84, 86)) #octets 85 et 86 === field 34 #83 à 88 = packet_date
     fields.append(readBitsASoctet(liste, 86, 88)) #octets 87 et 88 === field 35
-    print(fields)
+    #print(fields)
 
     return fields
 
@@ -211,19 +212,19 @@ def bin2deci(liste) -> int:
     val = 0
     for octet in liste:
         inv = octet[::-1]
-        print(f"octet après : {inv}")
+        #print(f"octet après : {inv}")
         for i in range(0, len()):
             if inv[i] == 1:
                 val += 2**i
-                print(f"val : {2**i}")
-                print(f"dans val on a : {val}")
-    print(f"val = {val}")
+                #print(f"val : {2**i}")
+                #print(f"dans val on a : {val}")
+    #print(f"val = {val}")
     return val
 
 #permet de convertir 1 octet donné en hexadécimal, la liste en entrée doit être préalablement inversée
 def bin2hex(byte) -> str:
     chaine = ""
-    print(f"byte = {byte}")
+    #print(f"byte = {byte}")
     res1 = 0
 
     for i in range(0, len(byte), 4):
@@ -235,7 +236,7 @@ def bin2hex(byte) -> str:
             res1 += n * 2**j
             j += 1
         hexval = hex(res1)
-        print(f"demi octet : {temp}, val : {hexval[2::]}")
+        #print(f"demi octet : {temp}, val : {hexval[2::]}")
 
         chaine += hexval[2::]
     
@@ -251,13 +252,14 @@ def extracteur() -> tuple:
     date = packet_date(file_bin)
     fields = lire_fields(file_bin)
     FT = lire_FT(file_bin)
-    FT6 = lire_FT6(file_bin, fields)
-    decalage += size
-
-    
+    FT6 = lire_FT6(file_bin, fields)   
 
     return size, macs, ips, date, FT, FT6
 
 
 if __name__ == "__main__":
+    start = time.time()
     print(extracteur())
+    end = time.time()
+    elapsed = end - start
+    print(elapsed)
