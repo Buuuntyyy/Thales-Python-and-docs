@@ -53,7 +53,7 @@ def frame_date(liste) -> float:
 #permet de lire la taille du paquet en octet
 def taille_paquet(liste, decalage) -> int:
     array = readBitsASoctet(liste, decalage + 24, decalage + 28)
-    print(array)
+    #print(array)
     array = array[::-1]
     return conv2dec(array)
 
@@ -165,7 +165,6 @@ def lire_fields(liste, decalage) -> list:
     fields.append((liste[decalage +615:decalage +616]))
     #octets 77 à 78 (78 inclu seulement): field 27, 28
         #field 27 : 2 bits (2 premiers bits)
-    fields.append("here")
     fields.append((liste[decalage +616:decalage +618]))
         #field 28 : 6 bits (6 derniers bits)
     fields.append((liste[decalage +618:decalage +623]))
@@ -239,7 +238,7 @@ def bin2hex(byte) -> str:
 def extracteur() -> tuple:
     path = "C:\\Users\\barfl\\Desktop\\saé_thalès\\ethernet.result_data"
     path2 = "C:\\Users\\Utlisateur\\Desktop\\programmation\\thales\\ethernet.result_data"
-    file_bin = read_binary_file_bits(path2) #on garde le fichier binaire en mémoire pour rapidement y accéder et ne le lire qu'une seule fois
+    file_bin = read_binary_file_bits(path) #on garde le fichier binaire en mémoire pour rapidement y accéder et ne le lire qu'une seule fois
     decalage = 0 #on initialise la variable de decalage à 0
     #secondes = frame_date(file_bin)
     #il faut boucler sur toute la trame --> while True:
@@ -259,7 +258,6 @@ def extracteur() -> tuple:
         for octet in fields:
             #print(f"octet = {octet} type : {type(octet)}")
             fields_traduc.append(bin2deci(octet))
-        print(len(fields_traduc))
 
 
         _resultat.append((size, macs, ips, fields_traduc, FT, FT6))
@@ -271,8 +269,11 @@ if __name__ == "__main__":
         print(extracteur())
     except IndexError:
         print(len(_resultat))
+    try:
+        fic = open("C:\\Users\\Utlisateur\\Desktop\\programmation\\thales\\output.txt", "w")
+    except FileNotFoundError:
+        fic = open("C:\\Users\\barfl\\Documents\\GitHub\\thales\\output.txt", "w")
 
-    fic = open("C:\\Users\\Utlisateur\\Desktop\\programmation\\thales\\output.txt", "w")
     for element in _resultat:
         fic.write(str(element) + "\n")
     fic.close()
