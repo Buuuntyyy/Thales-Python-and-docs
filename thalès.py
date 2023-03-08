@@ -1,5 +1,6 @@
 from datetime import datetime
 import binascii
+import threading
 _resultat = []
 
 def read_binary_file_bits(path) -> list:
@@ -164,8 +165,8 @@ def lire_fields(liste, decalage) -> list:
         #field 26 : 1 bit (8eme bit)
     fields.append((liste[decalage +615:decalage +616]))
     #octets 77 à 78 (78 inclu seulement): field 27, 28
-        #field 27 : 2 bits (2 premiers bits)
-    fields.append((liste[decalage +616:decalage +618]))
+        #field 27 : 2 bits (2 premiers bits), ne pas lire
+    #fields.append((liste[decalage +616:decalage +618]))
         #field 28 : 6 bits (6 derniers bits)
     fields.append((liste[decalage +618:decalage +623]))
     #octet 78 à 80 (79 et 80 inclus) : fields 29, 30
@@ -261,6 +262,7 @@ def extracteur() -> tuple:
 
 
         _resultat.append((size, macs, ips, fields_traduc, FT, FT6))
+        th1 = threading.Thread()
 
 
 
