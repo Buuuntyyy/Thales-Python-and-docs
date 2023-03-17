@@ -46,24 +46,15 @@ def conv2dec(array) -> int:
     #print(res)
     return res
 
-#nombre de seconde depuis 1 janvier 1970 --> passer en float double
+#nombre de secondes depuis 1 janvier 1970 --> passer en float double
 def frame_date(liste) -> float:
-    date = ""
-    ch = ""
-    ch = bytes(ch, 'utf-8')
+    tab = []
     array = readBitsASoctet(liste, 8, 16)
-    print(array)
     for element in array:
-        print(element)
-        ch += struct.pack(">b", element)
-    """for n in range(1, 1):
-        for i in range(0, 8):
-            ch += bytes(str(array[i * n]), 'utf-8')
-        print(ch)"""
-    print("==============================")
-    date = struct.unpack(">d", ch)
-    print(f"date : {date}")
-    return date
+        tab.append(struct.pack(">b", element))
+    return tab
+    #print(f"date : {date}")
+    #return date
     
 
 #permet de lire la taille du paquet en octet
@@ -123,14 +114,24 @@ def conv_ip(liste) -> tuple:
     #print(ipList)
     val = 0
     octet_val_ip2 = []
-
-    for i in range(0, 4):
-        val = 0
-        inv = ipList[i][::-1]
-        for i in range(0, 8):
-            if inv[i] == 1:
-                val += 2**i
-        octet_val_ip1.append(val)
+    try:
+        for i in range(0, 4):
+            val = 0
+            inv = ipList[i][::-1]
+            print(inv)
+            for i in range(0, 8):
+                if inv[i] == 1:
+                    val += 2**i
+            octet_val_ip1.append(val)
+    except IndexError:
+        for i in range(0, 4):
+            val = 0
+            inv = ipList[i][::-1]
+            print(inv)
+            for i in range(0, 8):
+                if inv[i] == 1:
+                    val += 2**i
+            octet_val_ip1.append(val)
     
     for i in range(4, 8):
         val = 0
@@ -271,7 +272,9 @@ def extracteur() -> tuple:
         FT = lire_FT(file_bin, decalage)
         FT6 = lire_FT6(file_bin, fields)
         decalage = decalage + size + 28
-        print(f"frame date : {frame_date(file_bin)}, taille : {len(frame_date(file_bin))}")
+        #print(f"frame date : {frame_date(file_bin)}, taille : {len(frame_date(file_bin))}")
+        frame_date(file_bin)
+        print(frame_date(file_bin)[0])
 
         for octet in fields:
             #print(f"octet = {octet} type : {type(octet)}")
