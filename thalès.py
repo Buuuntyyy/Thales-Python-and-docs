@@ -2,6 +2,7 @@ from datetime import datetime
 import binascii
 import threading
 _resultat = []
+import struct
 
 def read_binary_file_bits(path) -> list:
     with open(path, 'rb') as f:
@@ -47,9 +48,23 @@ def conv2dec(array) -> int:
 
 #nombre de seconde depuis 1 janvier 1970 --> passer en float double
 def frame_date(liste) -> float:
+    date = ""
+    ch = ""
+    ch = bytes(ch, 'utf-8')
     array = readBitsASoctet(liste, 8, 16)
-    time = conv2dec(array)
-    date_time = datetime.fromtimestamp(time)
+    print(array)
+    for element in array:
+        print(element)
+        ch += struct.pack(">b", element)
+    """for n in range(1, 1):
+        for i in range(0, 8):
+            ch += bytes(str(array[i * n]), 'utf-8')
+        print(ch)"""
+    print("==============================")
+    date = struct.unpack(">d", ch)
+    print(f"date : {date}")
+    return date
+    
 
 #permet de lire la taille du paquet en octet
 def taille_paquet(liste, decalage) -> int:
@@ -256,6 +271,7 @@ def extracteur() -> tuple:
         FT = lire_FT(file_bin, decalage)
         FT6 = lire_FT6(file_bin, fields)
         decalage = decalage + size + 28
+        print(f"frame date : {frame_date(file_bin)}, taille : {len(frame_date(file_bin))}")
 
         for octet in fields:
             #print(f"octet = {octet} type : {type(octet)}")
@@ -268,10 +284,10 @@ def extracteur() -> tuple:
 
 
 if __name__ == "__main__":
-    try:
-        print(extracteur())
-    except IndexError:
-        print(len(_resultat))
+
+    print(extracteur())
+
+    #print(f"taille : {len(_resultat)}")
     try:
         fic = open("C:\\Users\\Utlisateur\\Desktop\\programmation\\thales\\output.txt", "w")
     except FileNotFoundError:
@@ -281,7 +297,7 @@ if __name__ == "__main__":
         fic.write(str(element) + "\n")
     fic.close()
     print("fini")
-    print(_resultat[262])
+    #print(_resultat[262])
 
 
 #ajouter du threading pour que la lecture soit plus rapide : diviser le fichier en 2 partie et gérer avec 2 threads différents
