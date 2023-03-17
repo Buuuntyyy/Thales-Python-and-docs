@@ -134,6 +134,7 @@ def lire_fields(liste, decalage) -> list:
     fields.append(readBitsASoctet(liste, decalage +46, decalage +48)) #field 4
     fields.append(readBitsASoctet(liste, decalage +48, decalage +50)) #field 5
     fields.append(readBitsASoctet(liste, decalage +50, decalage +51)) #field 6
+    fields.append(readBitsASoctet(liste, decalage +51, decalage +52)) #field 7
     #octets IP et à ignorer
     fields.append(readBitsASoctet(liste, decalage +62, decalage +64)) #field 9
     fields.append(readBitsASoctet(liste, decalage +64, decalage +66)) #field 10
@@ -239,7 +240,7 @@ def bin2hex(byte) -> str:
 def extracteur() -> tuple:
     path = "C:\\Users\\barfl\\Desktop\\saé_thalès\\ethernet.result_data"
     path2 = "C:\\Users\\Utlisateur\\Desktop\\programmation\\thales\\ethernet.result_data"
-    file_bin = read_binary_file_bits(path2) #on garde le fichier binaire en mémoire pour rapidement y accéder et ne le lire qu'une seule fois
+    file_bin = read_binary_file_bits(path) #on garde le fichier binaire en mémoire pour rapidement y accéder et ne le lire qu'une seule fois
     decalage = 0 #on initialise la variable de decalage à 0
     #secondes = frame_date(file_bin)
     #il faut boucler sur toute la trame --> while True:
