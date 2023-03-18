@@ -1,6 +1,7 @@
 from datetime import datetime
 import binascii
 import threading
+import struct
 _resultat = []
 
 def read_binary_file_bits(path) -> list:
@@ -47,9 +48,12 @@ def conv2dec(array) -> int:
 
 #nombre de seconde depuis 1 janvier 1970 --> passer en float double
 def frame_date(liste) -> float:
+    result = 0
     array = readBitsASoctet(liste, 8, 16)
-    time = conv2dec(array)
-    date_time = datetime.fromtimestamp(time)
+    for i in range(0, len(array), 8):
+        packed = struct.pack(">bbbbbbbb", array[i], array[i+1], array[i+2], array[i+3], array[i+4], array[i+5], array[i+6], array[i+7])
+        result += struct.unpack(">d", packed)[0]
+    print(packed)
 
 #permet de lire la taille du paquet en octet
 def taille_paquet(liste, decalage) -> int:
@@ -256,6 +260,7 @@ def extracteur() -> tuple:
         FT = lire_FT(file_bin, decalage)
         FT6 = lire_FT6(file_bin, fields)
         decalage = decalage + size + 28
+        frame_date(file_bin)
 
         for octet in fields:
             #print(f"octet = {octet} type : {type(octet)}")
