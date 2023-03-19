@@ -1,6 +1,7 @@
 import datetime
 import binascii
 import time
+import struct
 
 def read_binary_file_bits(path) -> list:
     with open(path, 'rb') as f:
@@ -56,35 +57,6 @@ def conv2dec(array) -> int:
             res += 2**i
     #print(res)
     return res
-
-#nombre de seconde depuis 1 janvier 1970 --> passer en float double
-def frame_date(liste) -> float:
-<<<<<<< Updated upstream
-    array = readBitsASoctet(liste, 8, 16)
-    time = conv2dec(array)
-    date_time = datetime.fromtimestamp(time)
-    #print(date_time)
-=======
-    print("new")
-    tab = []
-    tr = []
-    result = 0.0
-    array = readBitsASoctet(liste, 8, 16)
-    for i in range(0, len(array), 8):
-        print("boucle")
-        packed = struct.pack(">bbbbbbbb", array[i], array[i+1], array[i+2], array[i+3], array[i+4], array[i+5], array[i+6], array[i+7])
-        print(packed)
-        result += struct.unpack(">d", packed)[0]
-        print(result)
-        tab.append(packed)
-        tr.append(result)
-    print(f"result : {result}")
-    #print(tab[0:8])
-    #print(struct.unpack(">d", tab[0]))
-    #print(tr[0])
-    date_time = datetime.datetime.fromtimestamp(result)
-    print(date_time)
->>>>>>> Stashed changes
 
 #permet de lire la taille du paquet en octet
 def taille_paquet(liste) -> int:
