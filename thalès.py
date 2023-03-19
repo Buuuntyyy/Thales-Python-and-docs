@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 import binascii
 import time
 
@@ -12,6 +12,16 @@ def read_binary_file_bits(path) -> list:
             bit = (byte >> i) & 1
             bit_array.append(bit)
     return bit_array
+
+def read_date(path) -> str:
+    with open(path, 'rb') as f:
+        binary_data = f.read()
+    date = struct.unpack('>d', binary_data[8:16])
+    date_base = datetime.datetime(1970,1,1,0,0,0)
+    date_data = datetime.timedelta(seconds=date[0])
+    date_result = date_base + date_data
+    return date_result.strftime("%d:%m:%Y:%H:%M:%S")
+    
 
 """Non utilisé pour l'instant"""
 #fonction permettant de trier la liste de bits en octets (liste de 8 bits)
@@ -49,10 +59,32 @@ def conv2dec(array) -> int:
 
 #nombre de seconde depuis 1 janvier 1970 --> passer en float double
 def frame_date(liste) -> float:
+<<<<<<< Updated upstream
     array = readBitsASoctet(liste, 8, 16)
     time = conv2dec(array)
     date_time = datetime.fromtimestamp(time)
     #print(date_time)
+=======
+    print("new")
+    tab = []
+    tr = []
+    result = 0.0
+    array = readBitsASoctet(liste, 8, 16)
+    for i in range(0, len(array), 8):
+        print("boucle")
+        packed = struct.pack(">bbbbbbbb", array[i], array[i+1], array[i+2], array[i+3], array[i+4], array[i+5], array[i+6], array[i+7])
+        print(packed)
+        result += struct.unpack(">d", packed)[0]
+        print(result)
+        tab.append(packed)
+        tr.append(result)
+    print(f"result : {result}")
+    #print(tab[0:8])
+    #print(struct.unpack(">d", tab[0]))
+    #print(tr[0])
+    date_time = datetime.datetime.fromtimestamp(result)
+    print(date_time)
+>>>>>>> Stashed changes
 
 #permet de lire la taille du paquet en octet
 def taille_paquet(liste) -> int:
@@ -246,6 +278,7 @@ def extracteur() -> tuple:
     path = "C:\\Users\\barfl\\Desktop\\saé_thalès\\ethernet.result_data"
     file_bin = read_binary_file_bits(path) #on garde le fichier binaire en mémoire pour rapidement y accéder et ne le lire qu'une seule fois
     #secondes = frame_date(file_bin)
+<<<<<<< Updated upstream
     size = taille_paquet(file_bin)
     macs = lire_addr_mac(file_bin)
     ips = lire_addr_ip(file_bin)
@@ -253,6 +286,31 @@ def extracteur() -> tuple:
     fields = lire_fields(file_bin)
     FT = lire_FT(file_bin)
     FT6 = lire_FT6(file_bin, fields)   
+=======
+    #il faut boucler sur toute la trame --> while True:
+    #il faut aussi appliquer un decalage à chaque fonction de lecture sauf FT6
+
+    while True:
+        fields_traduc = []
+        size = taille_paquet(file_bin, decalage)
+        macs = lire_addr_mac(file_bin, decalage)
+        ips = lire_addr_ip(file_bin, decalage)
+        date = packet_date(file_bin, decalage)
+        fields = lire_fields(file_bin, decalage)
+        FT = lire_FT(file_bin, decalage)
+        FT6 = lire_FT6(file_bin, fields)
+        decalage = decalage + size + 28
+        #frame_date(file_bin)
+        read_date(path)
+
+        for octet in fields:
+            #print(f"octet = {octet} type : {type(octet)}")
+            fields_traduc.append(bin2deci(octet))
+
+
+        _resultat.append((size, macs, ips, fields_traduc, FT, FT6))
+        th1 = threading.Thread()
+>>>>>>> Stashed changes
 
     return size, macs, ips, date, FT, FT6
 
