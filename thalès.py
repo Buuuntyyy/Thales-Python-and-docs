@@ -1,8 +1,8 @@
-from datetime import datetime
+import datetime
 import binascii
 import threading
-_resultat = []
 import struct
+_resultat = []
 
 def read_binary_file_bits(path) -> list:
     with open(path, 'rb') as f:
@@ -114,24 +114,14 @@ def conv_ip(liste) -> tuple:
     #print(ipList)
     val = 0
     octet_val_ip2 = []
-    try:
-        for i in range(0, 4):
-            val = 0
-            inv = ipList[i][::-1]
-            print(inv)
-            for i in range(0, 8):
-                if inv[i] == 1:
-                    val += 2**i
-            octet_val_ip1.append(val)
-    except IndexError:
-        for i in range(0, 4):
-            val = 0
-            inv = ipList[i][::-1]
-            print(inv)
-            for i in range(0, 8):
-                if inv[i] == 1:
-                    val += 2**i
-            octet_val_ip1.append(val)
+    for i in range(0, 4):
+        val = 0
+        inv = ipList[i][::-1]
+        #print(inv)
+        for i in range(0, 8):
+            if inv[i] == 1:
+                val += 2**i
+        octet_val_ip1.append(val)
     
     for i in range(4, 8):
         val = 0
@@ -264,6 +254,7 @@ def extracteur() -> tuple:
 
     while True:
         fields_traduc = []
+        date = read_date(path)
         size = taille_paquet(file_bin, decalage)
         macs = lire_addr_mac(file_bin, decalage)
         ips = lire_addr_ip(file_bin, decalage)
@@ -272,16 +263,12 @@ def extracteur() -> tuple:
         FT = lire_FT(file_bin, decalage)
         FT6 = lire_FT6(file_bin, fields)
         decalage = decalage + size + 28
-        #print(f"frame date : {frame_date(file_bin)}, taille : {len(frame_date(file_bin))}")
-        frame_date(file_bin)
-        print(frame_date(file_bin)[0])
 
         for octet in fields:
-            #print(f"octet = {octet} type : {type(octet)}")
             fields_traduc.append(bin2deci(octet))
 
 
-        _resultat.append((size, macs, ips, fields_traduc, FT, FT6))
+        _resultat.append((date, size, macs, ips, fields_traduc, FT, FT6))
         th1 = threading.Thread()
 
 
@@ -301,4 +288,3 @@ if __name__ == "__main__":
     fic.close()
     print("fini")
     #print(_resultat[262])
-
