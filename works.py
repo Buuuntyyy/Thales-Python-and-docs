@@ -243,7 +243,16 @@ def bin2hex(byte) -> str:
     
     return chaine
 
-def extracteur() -> tuple:
+def is_UDP():
+    path = "C:\\Users\\barfl\\Desktop\\saé_thalès\\ethernet.result_data"
+    file = read_binary_file_bits(path)
+    test = file[40*8:42*8]
+    print(test)
+    print(bin2deci(test))
+    t = bin2deci(test)
+    return t == "800"
+
+def extracteur_UDP() -> tuple:
     path = "C:\\Users\\barfl\\Desktop\\saé_thalès\\ethernet.result_data"
     decalage = 1
     file_bin = read_binary_file_bits(path) #on garde le fichier binaire en mémoire pour rapidement y accéder et ne le lire qu'une seule fois
@@ -260,6 +269,9 @@ def extracteur() -> tuple:
 
     return date_exec, size, macs, ips, date, FT, FT6
 
+def extracteur_ARP():
+    ...
+
 def lire_rep(path):
     entete = []
     fic = open("C:\\Users\\barfl\\Desktop\\saé_thalès\\Vt_DEMO_mem_observability.rep")
@@ -274,17 +286,20 @@ def lire_rep(path):
 
 if __name__ == "__main__":
 
-    print(extracteur())
+    print(extracteur_UDP())
 
     #print(f"taille : {len(_resultat)}")
-    try:
-        fic = open("C:\\Users\\Utlisateur\\Desktop\\programmation\\thales\\output.txt", "w")
-    except FileNotFoundError:
-        fic = open("C:\\Users\\barfl\\Documents\\GitHub\\thales\\output.txt", "w")
-
-    for element in _resultat:
-        fic.write(str(element) + "\n")
-    fic.close()
-    lire_rep("ap")
-    print("fini")
+    if is_UDP():
+        try:
+            fic = open("C:\\Users\\Utlisateur\\Desktop\\programmation\\thales\\output.txt", "w")
+        except FileNotFoundError:
+            fic = open("C:\\Users\\barfl\\Documents\\GitHub\\thales\\output.txt", "w")
+q
+        for element in _resultat:
+            fic.write(str(element) + "\n")
+        fic.close()
+        lire_rep("ap")
+        print("fini")
+    else:
+        print("pas udp")
     #print(_resultat[262])
