@@ -2,6 +2,7 @@ import datetime
 import binascii
 import time
 import struct
+import threading
 
 _resultat = []
 _decalage = 1
@@ -291,19 +292,15 @@ def lire_rep(path):
 
 if __name__ == "__main__":
 
-    print(extracteur_UDP())
-
     #print(f"taille : {len(_resultat)}")
     if is_UDP():
         fic = open("C:\\Users\\barfl\\Documents\\GitHub\\thales\\output.txt", "w")
-        _resultat = extracteur_UDP()
+        while True:
+            _resultat = extracteur_UDP()
+        
         for element in _resultat:
             fic.write(str(element) + "\n")
-            print(element)
         fic.close()
-        lire_rep("ap")
-        print("fini")
     else:
         print("pas udp")
-        extracteur_ARP()
     #print(_resultat[262])
