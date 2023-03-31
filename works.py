@@ -4,6 +4,7 @@ import time
 import struct
 
 _resultat = []
+_decalage = 1
 
 def read_binary_file_bits(path) -> list:
     with open(path, 'rb') as f:
@@ -248,29 +249,33 @@ def is_UDP():
     file = read_binary_file_bits(path)
     test = file[40*8:42*8]
     print(test)
-    print(bin2deci(test))
-    t = bin2deci(test)
-    return t == "800"
+    print(bin2hex(test))
+    t = bin2hex(test)
+    return t == "0800"
 
 def extracteur_UDP() -> tuple:
     path = "C:\\Users\\barfl\\Desktop\\saé_thalès\\ethernet.result_data"
-    decalage = 1
     file_bin = read_binary_file_bits(path) #on garde le fichier binaire en mémoire pour rapidement y accéder et ne le lire qu'une seule fois
     #secondes = frame_date(file_bin)
     
     date_exec = read_date(path)
-    size = taille_paquet(file_bin, decalage)
-    macs = lire_addr_mac(file_bin, decalage)
-    ips = lire_addr_ip(file_bin, decalage)
-    date = packet_date(file_bin, decalage)
-    fields = lire_fields(file_bin, decalage)
-    FT = lire_FT(file_bin, decalage)
+    size = taille_paquet(file_bin, _decalage)
+    macs = lire_addr_mac(file_bin, _decalage)
+    ips = lire_addr_ip(file_bin, _decalage)
+    date = packet_date(file_bin, _decalage)
+    fields = lire_fields(file_bin, _decalage)
+    FT = lire_FT(file_bin, _decalage)
     FT6 = lire_FT6(file_bin, fields)   
 
     return date_exec, size, macs, ips, date, FT, FT6
 
-def extracteur_ARP():
-    ...
+def extracteur_ARP(path):
+    file_bin = read_binary_file_bits(path)
+    date = read_date(path)
+    size = taille_paquet(file_bin, _decalage)
+    macs = lire_addr_mac(file_bin, _decalage)
+    ips = lire_addr_ip(file_bin, _decalage)
+    date = packet_date(file_bin, _decalage)
 
 def lire_rep(path):
     entete = []
@@ -290,16 +295,15 @@ if __name__ == "__main__":
 
     #print(f"taille : {len(_resultat)}")
     if is_UDP():
-        try:
-            fic = open("C:\\Users\\Utlisateur\\Desktop\\programmation\\thales\\output.txt", "w")
-        except FileNotFoundError:
-            fic = open("C:\\Users\\barfl\\Documents\\GitHub\\thales\\output.txt", "w")
-q
+        fic = open("C:\\Users\\barfl\\Documents\\GitHub\\thales\\output.txt", "w")
+        _resultat = extracteur_UDP()
         for element in _resultat:
             fic.write(str(element) + "\n")
+            print(element)
         fic.close()
         lire_rep("ap")
         print("fini")
     else:
         print("pas udp")
+        extracteur_ARP()
     #print(_resultat[262])
