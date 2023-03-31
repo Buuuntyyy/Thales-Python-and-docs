@@ -259,16 +259,17 @@ def extracteur_UDP() -> tuple:
     file_bin = read_binary_file_bits(path) #on garde le fichier binaire en mémoire pour rapidement y accéder et ne le lire qu'une seule fois
     #secondes = frame_date(file_bin)
     
-    date_exec = read_date(path)
-    size = taille_paquet(file_bin, _decalage)
-    macs = lire_addr_mac(file_bin, _decalage)
-    ips = lire_addr_ip(file_bin, _decalage)
-    date = packet_date(file_bin, _decalage)
-    fields = lire_fields(file_bin, _decalage)
-    FT = lire_FT(file_bin, _decalage)
-    FT6 = lire_FT6(file_bin, fields)   
+    while True:
+        date_exec = read_date(path)
+        size = taille_paquet(file_bin, _decalage)
+        macs = lire_addr_mac(file_bin, _decalage)
+        ips = lire_addr_ip(file_bin, _decalage)
+        date = packet_date(file_bin, _decalage)
+        fields = lire_fields(file_bin, _decalage)
+        FT = lire_FT(file_bin, _decalage)
+        FT6 = lire_FT6(file_bin, fields)   
 
-    return date_exec, size, macs, ips, date, FT, FT6
+        _resultat.append((date_exec, size, macs, ips, date, FT, FT6))
 
 def extracteur_ARP(path):
     file_bin = read_binary_file_bits(path)
@@ -294,10 +295,8 @@ if __name__ == "__main__":
 
     #print(f"taille : {len(_resultat)}")
     if is_UDP():
+        extracteur_UDP()
         fic = open("C:\\Users\\barfl\\Documents\\GitHub\\thales\\output.txt", "w")
-        while True:
-            _resultat = extracteur_UDP()
-        
         for element in _resultat:
             fic.write(str(element) + "\n")
         fic.close()
