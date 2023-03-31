@@ -260,6 +260,18 @@ def extracteur() -> tuple:
 
     return date_exec, size, macs, ips, date, FT, FT6
 
+def lire_rep(path):
+    entete = []
+    fic = open("C:\\Users\\barfl\\Desktop\\saé_thalès\\Vt_DEMO_mem_observability.rep")
+    for i in range(0, 28):
+        line = fic.readline()
+        entete.append(line)
+    rep = [entete[7][39:len(entete[7])], entete[8][39:len(entete[8])], entete[9][39:len(entete[9])], 
+           entete[10][39:len(entete[10])], entete[14][39:len(entete[14])], entete[27][39:len(entete[27])]]
+    print(rep)
+
+    #le fichier rep doit être exactement comme donné lors des test. Aucun titre de ligne ne doit être changé
+
 if __name__ == "__main__":
 
     print(extracteur())
@@ -273,5 +285,6 @@ if __name__ == "__main__":
     for element in _resultat:
         fic.write(str(element) + "\n")
     fic.close()
+    lire_rep("ap")
     print("fini")
     #print(_resultat[262])
