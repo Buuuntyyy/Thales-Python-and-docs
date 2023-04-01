@@ -4,7 +4,7 @@ import time
 import struct
 import threading
 
-_resultat = []
+_resultat = ()
 _decalage = 1
 
 def read_binary_file_bits(path) -> list:
@@ -254,6 +254,12 @@ def is_UDP():
     t = bin2hex(test)
     return t == "0800"
 
+def ecrire(result):
+        fic = open("C:\\Users\\barfl\\Documents\\GitHub\\thales\\output.txt", "a")
+        for element in result:
+            fic.write(str(element))
+        fic.close()
+
 def extracteur_UDP() -> tuple:
     path = "C:\\Users\\barfl\\Desktop\\saé_thalès\\ethernet.result_data"
     file_bin = read_binary_file_bits(path) #on garde le fichier binaire en mémoire pour rapidement y accéder et ne le lire qu'une seule fois
@@ -264,12 +270,13 @@ def extracteur_UDP() -> tuple:
         size = taille_paquet(file_bin, _decalage)
         macs = lire_addr_mac(file_bin, _decalage)
         ips = lire_addr_ip(file_bin, _decalage)
-        date = packet_date(file_bin, _decalage)
         fields = lire_fields(file_bin, _decalage)
         FT = lire_FT(file_bin, _decalage)
-        FT6 = lire_FT6(file_bin, fields)   
+        FT6 = lire_FT6(file_bin, fields)
+        _resultat = (date_exec, size, macs, ips, fields, FT, FT6)
+        ecrire(_resultat)
 
-        _resultat.append((date_exec, size, macs, ips, date, FT, FT6))
+        
 
 def extracteur_ARP(path):
     file_bin = read_binary_file_bits(path)
@@ -296,10 +303,6 @@ if __name__ == "__main__":
     #print(f"taille : {len(_resultat)}")
     if is_UDP():
         extracteur_UDP()
-        fic = open("C:\\Users\\barfl\\Documents\\GitHub\\thales\\output.txt", "w")
-        for element in _resultat:
-            fic.write(str(element) + "\n")
-        fic.close()
     else:
         print("pas udp")
     #print(_resultat[262])
