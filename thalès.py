@@ -5,6 +5,7 @@ import struct
 _resultat = []
 
 def read_binary_file_bits(path) -> list:
+    print(path)
     with open(path, 'rb') as f:
         binary_data = f.read()
 
@@ -246,7 +247,7 @@ def bin2hex(byte) -> str:
 def extracteur() -> tuple:
     path = "C:\\Users\\barfl\\Desktop\\saé_thalès\\ethernet.result_data"
     path2 = "C:\\Users\\Utlisateur\\Desktop\\programmation\\thales\\ethernet.result_data"
-    file_bin = read_binary_file_bits(path) #on garde le fichier binaire en mémoire pour rapidement y accéder et ne le lire qu'une seule fois
+    file_bin = read_binary_file_bits(path2) #on garde le fichier binaire en mémoire pour rapidement y accéder et ne le lire qu'une seule fois
     decalage = 0 #on initialise la variable de decalage à 0
     #secondes = frame_date(file_bin)
     #il faut boucler sur toute la trame --> while True:
@@ -268,14 +269,11 @@ def extracteur() -> tuple:
             fields_traduc.append(bin2deci(octet))
 
 
-        _resultat.append((date, size, macs, ips, fields_traduc, FT, FT6))
-        th1 = threading.Thread()
-
 
 
 if __name__ == "__main__":
 
-    print(extracteur())
+    extracteur()
 
     #print(f"taille : {len(_resultat)}")
     try:
