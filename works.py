@@ -108,15 +108,19 @@ def packet_date(fields_liste, decalage):
 
 
 def conv_ip(liste) -> tuple:
+
     octet_val_ip1 = []
     ipList = order_octet(liste)
     #print(ipList)
     val = 0
     octet_val_ip2 = []
+
     for i in range(0, 4):
         val = 0
+        print(ipList[i])
+        print(ipList[i][::-1])
         inv = ipList[i][::-1]
-        #print(inv)
+        #print(f"octet : {inv}")
         for i in range(0, 8):
             if inv[i] == 1:
                 val += 2**i
@@ -125,11 +129,12 @@ def conv_ip(liste) -> tuple:
     for i in range(4, 8):
         val = 0
         inv = ipList[i][::-1]
+        #print(f"octet : {inv}")
         for i in range(0, 8):
             if inv[i] == 1:
                 val += 2**i
         octet_val_ip2.append(val)    
-    return octet_val_ip1, octet_val_ip2    
+    return octet_val_ip1, octet_val_ip2      
 
 def lire_fields(liste, decalage) -> list:
     fields = []
@@ -261,8 +266,10 @@ def extracteur_UDP() -> tuple:
 
     file_bin = read_binary_file_bits(path2) #on garde le fichier binaire en mémoire pour rapidement y accéder et ne le lire qu'une seule fois
     #secondes = frame_date(file_bin)
-    
+    i = 0
     while True:
+        i += 1
+        print(i)
         date_exec = read_date(path2)
         size = taille_paquet(file_bin, _decalage)
         macs = lire_addr_mac(file_bin, _decalage)
