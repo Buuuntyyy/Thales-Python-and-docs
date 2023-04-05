@@ -255,6 +255,7 @@ def is_UDP():
     return t == "0800"
 
 def extracteur_UDP() -> tuple:
+    _decalage = 1
     path = "C:\\Users\\barfl\\Desktop\\saé_thalès\\ethernet.result_data"
     file_bin = read_binary_file_bits(path) #on garde le fichier binaire en mémoire pour rapidement y accéder et ne le lire qu'une seule fois
     #secondes = frame_date(file_bin)
@@ -270,6 +271,7 @@ def extracteur_UDP() -> tuple:
         FT6 = lire_FT6(file_bin, fields)   
 
         _resultat.append((date_exec, size, macs, ips, date, FT, FT6))
+        _decalage += size
 
 def extracteur_ARP(path):
     file_bin = read_binary_file_bits(path)

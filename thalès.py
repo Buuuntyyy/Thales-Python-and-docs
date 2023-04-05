@@ -6,6 +6,7 @@ _resultat = []
 
 def read_binary_file_bits(path) -> list:
     print(path)
+    print("======================================================")
     with open(path, 'rb') as f:
         binary_data = f.read()
 
@@ -279,6 +280,7 @@ if __name__ == "__main__":
     try:
         fic = open("C:\\Users\\Utlisateur\\Desktop\\programmation\\thales\\output.txt", "w")
     except FileNotFoundError:
+        print("error")
         fic = open("C:\\Users\\barfl\\Documents\\GitHub\\thales\\output.txt", "w")
 
     for element in _resultat:
