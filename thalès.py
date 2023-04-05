@@ -258,12 +258,5 @@ def extracteur() -> tuple:
 
 
 if __name__ == "__main__":
-    moy = 0
-    for i in range(0, 100):
-        start = time.time()
-        print(extracteur())
-        end = time.time()
-        elapsed = end - start
-        print(elapsed)
-        moy += elapsed
-    print(moy/100)
+    print(extracteur())
+
