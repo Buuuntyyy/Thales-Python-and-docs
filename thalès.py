@@ -243,7 +243,7 @@ def bin2hex(byte) -> str:
     return chaine
 
 def extracteur() -> tuple:
-    path = "C:\\Users\\barfl\\Desktop\\saé_thalès\\ethernet.result_data"
+    path = "C:\\Users\\Utlisateur\\Desktop\\ethernet.result_data"
     file_bin = read_binary_file_bits(path) #on garde le fichier binaire en mémoire pour rapidement y accéder et ne le lire qu'une seule fois
     #secondes = frame_date(file_bin)
     size = taille_paquet(file_bin)
