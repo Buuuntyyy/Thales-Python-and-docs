@@ -6,12 +6,11 @@ def read_binary_file_bits(path) -> list:
     with open(path, 'rb') as f:
         binary_data = f.read()
 
-    bit_array = []
-    for byte in binary_data:
-        for i in range(7, -1, -1):
-            bit = (byte >> i) & 1
-            bit_array.append(bit)
-    return bit_array
+    return binary_data
+
+path = "C:\\Users\\barfl\\Desktop\\saé_thalès\\ethernet.result_data"
+print(read_binary_file_bits(path))
+
 
 """Non utilisé pour l'instant"""
 #fonction permettant de trier la liste de bits en octets (liste de 8 bits)
