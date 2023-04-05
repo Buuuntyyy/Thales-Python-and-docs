@@ -1,10 +1,13 @@
-from datetime import datetime
+import datetime
 import binascii
 import threading
-_resultat = []
 import struct
+_resultat = []
+
 
 def read_binary_file_bits(path) -> list:
+    print(path)
+    print("======================================================")
     with open(path, 'rb') as f:
         binary_data = f.read()
 
@@ -47,14 +50,14 @@ def conv2dec(array) -> int:
     return res
 
 #nombre de secondes depuis 1 janvier 1970 --> passer en float double
-def frame_date(liste) -> float:
-    tab = []
-    array = readBitsASoctet(liste, 8, 16)
-    for element in array:
-        tab.append(struct.pack(">b", element))
-    return tab
-    #print(f"date : {date}")
-    #return date
+def read_date(path) -> str:
+    with open(path, 'rb') as f:
+        binary_data = f.read()
+    date = struct.unpack('>d', binary_data[8:16])
+    date_base = datetime.datetime(1970,1,1,0,0,0)
+    date_data = datetime.timedelta(seconds=date[0])
+    date_result = date_base + date_data
+    return date_result.strftime("%d:%m:%Y:%H:%M:%S")
     
 
 #permet de lire la taille du paquet en octet
@@ -89,17 +92,20 @@ def lire_addr_ip(liste, decalage) -> str: #octet 54 à 62
     addrIp2 = ""
     bdata = readBitsASoctet(liste, decalage + 54, decalage + 62)
     addresses = conv_ip(bdata)
-    s_addr = addresses[0]
-    d_addr = addresses[1]
-    for element in s_addr:
-        addrIp1 += str(element) + "."
-    for element in d_addr:
-        addrIp2 += str(element) + "."
-    addrIp1 = addrIp1[0:13]
-    addrIp2 = addrIp2[0:13]
-    #print(addrIp1, addrIp2)
+    if addresses != None:
+        s_addr = addresses[0]
+        d_addr = addresses[1]
+        for element in s_addr:
+            addrIp1 += str(element) + "."
+        for element in d_addr:
+            addrIp2 += str(element) + "."
+        addrIp1 = addrIp1[0:13]
+        addrIp2 = addrIp2[0:13]
+        #print(addrIp1, addrIp2)
+        return addrIp1, addrIp2
+    else:
+        return None
 
-    return addrIp1, addrIp2
 
 #lire packet date
 def packet_date(fields_liste, decalage):
@@ -107,40 +113,35 @@ def packet_date(fields_liste, decalage):
     for i in range(decalage + 19,decalage + 22):
         packet_dateListe.append(fields_liste[i])
 
-
 def conv_ip(liste) -> tuple:
+
     octet_val_ip1 = []
-    ipList = order_octet(liste)
-    #print(ipList)
-    val = 0
-    octet_val_ip2 = []
-    try:
-        for i in range(0, 4):
-            val = 0
-            inv = ipList[i][::-1]
-            print(inv)
-            for i in range(0, 8):
-                if inv[i] == 1:
-                    val += 2**i
-            octet_val_ip1.append(val)
-    except IndexError:
-        for i in range(0, 4):
-            val = 0
-            inv = ipList[i][::-1]
-            print(inv)
-            for i in range(0, 8):
-                if inv[i] == 1:
-                    val += 2**i
-            octet_val_ip1.append(val)
-    
-    for i in range(4, 8):
+    if len(liste) != 64:
+        return None
+    else:
+        ipList = order_octet(liste)
+        #print(ipList)
         val = 0
-        inv = ipList[i][::-1]
-        for i in range(0, 8):
-            if inv[i] == 1:
-                val += 2**i
-        octet_val_ip2.append(val)    
-    return octet_val_ip1, octet_val_ip2    
+        octet_val_ip2 = []
+
+        for i in range(0, 4):
+            val = 0
+            inv = ipList[i][::-1]
+            #print(f"octet : {inv}")
+            for i in range(0, 8):
+                if inv[i] == 1:
+                    val += 2**i
+            octet_val_ip1.append(val)
+        
+        for i in range(4, 8):
+            val = 0
+            inv = ipList[i][::-1]
+            #print(f"octet : {inv}")
+            for i in range(0, 8):
+                if inv[i] == 1:
+                    val += 2**i
+            octet_val_ip2.append(val)    
+        return octet_val_ip1, octet_val_ip2    
 
 def lire_fields(liste, decalage) -> list:
     fields = []
@@ -253,53 +254,93 @@ def bin2hex(byte) -> str:
     
     return chaine
 
+def is_UDP(file):
+    test = file[40*8:42*8]
+    print(test)
+    print(bin2hex(test))
+    t = bin2hex(test)
+    return t == "0800"
+
+def extracteur_ARP(path):
+    _decalage = 0
+    file_bin = read_binary_file_bits(path)
+    date = read_date(path)
+    size = taille_paquet(file_bin, _decalage)
+    macs = lire_addr_mac(file_bin, _decalage)
+    ips = lire_addr_ip(file_bin, _decalage)
+    #date = packet_date(file_bin, _decalage)
+    _resultat.append(("ARP", size, macs, ips, date))
+
+def lire_rep(path):
+    entete = []
+    fic = open("C:\\Users\\Utlisateur\\Desktop\\programmation\\thales\Vt-DEMO_mem_observability\\Vt_DEMO_mem_observability.rep")
+    line = fic.readlines()
+    #rep = [entete[7][39:len(entete[7])], entete[8][39:len(entete[8])], entete[9][39:len(entete[9])], 
+           #entete[10][39:len(entete[10])], entete[14][39:len(entete[14])], entete[27][39:len(entete[27])]]
+    t1 = line[7].split(":")
+    t2 = line[8].split(":")
+    t3 = line[9].split(":")
+    t4 = line[10].split(":")
+    t5 = line[14].split(":")
+    t6 = line[27].split(":")
+
+    return(t1, t2, t3, t4, t5, t6)
+
+
 def extracteur() -> tuple:
     path = "C:\\Users\\barfl\\Desktop\\saé_thalès\\ethernet.result_data"
     path2 = "C:\\Users\\Utlisateur\\Desktop\\programmation\\thales\\ethernet.result_data"
     file_bin = read_binary_file_bits(path2) #on garde le fichier binaire en mémoire pour rapidement y accéder et ne le lire qu'une seule fois
-    decalage = 0 #on initialise la variable de decalage à 0
+    _decalage = 0 #on initialise la variable de decalage à 0
     #secondes = frame_date(file_bin)
     #il faut boucler sur toute la trame --> while True:
     #il faut aussi appliquer un decalage à chaque fonction de lecture sauf FT6
+    i = 0
 
     while True:
-        fields_traduc = []
-        size = taille_paquet(file_bin, decalage)
-        macs = lire_addr_mac(file_bin, decalage)
-        ips = lire_addr_ip(file_bin, decalage)
-        date = packet_date(file_bin, decalage)
-        fields = lire_fields(file_bin, decalage)
-        FT = lire_FT(file_bin, decalage)
-        FT6 = lire_FT6(file_bin, fields)
-        decalage = decalage + size + 28
-        #print(f"frame date : {frame_date(file_bin)}, taille : {len(frame_date(file_bin))}")
-        frame_date(file_bin)
-        print(frame_date(file_bin)[0])
+        if not is_UDP(file_bin):
+            extracteur_ARP()
+        else:
+            i += 1
+            print(i)
+            fields_traduc = []        
+            ips = lire_addr_ip(file_bin, _decalage)
+            if ips == None:
+                return 0
+            else:
+                date = read_date(path2)
+                size = taille_paquet(file_bin, _decalage)
+                macs = lire_addr_mac(file_bin, _decalage)
 
-        for octet in fields:
-            #print(f"octet = {octet} type : {type(octet)}")
-            fields_traduc.append(bin2deci(octet))
+                date = packet_date(file_bin, _decalage)
+                fields = lire_fields(file_bin, _decalage)
+                FT = lire_FT(file_bin, _decalage)
+                FT6 = lire_FT6(file_bin, fields)
+                _decalage = _decalage + size + 28
 
+            for octet in fields:
+                fields_traduc.append(bin2deci(octet))
 
-        _resultat.append((size, macs, ips, fields_traduc, FT, FT6))
+            _resultat.append((size, macs, ips, fields_traduc, date, FT, FT6))
+
 
 
 
 if __name__ == "__main__":
 
-    print(extracteur())
+    extracteur()
 
     #print(f"taille : {len(_resultat)}")
     try:
         fic = open("C:\\Users\\Utlisateur\\Desktop\\programmation\\thales\\output.txt", "w")
+        print("ok")
     except FileNotFoundError:
+        print("error")
         fic = open("C:\\Users\\barfl\\Documents\\GitHub\\thales\\output.txt", "w")
 
     for element in _resultat:
         fic.write(str(element) + "\n")
     fic.close()
+    lire_rep(" ")
     print("fini")
     #print(_resultat[262])
-
-
-#ajouter du threading pour que la lecture soit plus rapide : diviser le fichier en 2 partie et gérer avec 2 threads différents
