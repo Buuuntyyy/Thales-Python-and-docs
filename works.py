@@ -246,7 +246,7 @@ def bin2hex(byte) -> str:
     return chaine
 
 def is_UDP():
-    path = "C:\\Users\\barfl\\Desktop\\saé_thalès\\ethernet.result_data"
+    path = "C:\\Users\\Utlisateur\\Desktop\\programmation\\thales\\ethernet.result_data"
     file = read_binary_file_bits(path)
     test = file[40*8:42*8]
     print(test)
@@ -257,11 +257,13 @@ def is_UDP():
 def extracteur_UDP() -> tuple:
     _decalage = 1
     path = "C:\\Users\\barfl\\Desktop\\saé_thalès\\ethernet.result_data"
-    file_bin = read_binary_file_bits(path) #on garde le fichier binaire en mémoire pour rapidement y accéder et ne le lire qu'une seule fois
+    path2 = "C:\\Users\\Utlisateur\\Desktop\\programmation\\thales\\ethernet.result_data"
+
+    file_bin = read_binary_file_bits(path2) #on garde le fichier binaire en mémoire pour rapidement y accéder et ne le lire qu'une seule fois
     #secondes = frame_date(file_bin)
     
     while True:
-        date_exec = read_date(path)
+        date_exec = read_date(path2)
         size = taille_paquet(file_bin, _decalage)
         macs = lire_addr_mac(file_bin, _decalage)
         ips = lire_addr_ip(file_bin, _decalage)
@@ -298,7 +300,7 @@ if __name__ == "__main__":
     #print(f"taille : {len(_resultat)}")
     if is_UDP():
         extracteur_UDP()
-        fic = open("C:\\Users\\barfl\\Documents\\GitHub\\thales\\output.txt", "w")
+        fic = open("C:\\Users\\Utlisateur\\Desktop\\programmation\\thales\\ethernet.result_data", "w")
         for element in _resultat:
             fic.write(str(element) + "\n")
         fic.close()
