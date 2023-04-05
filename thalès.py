@@ -10,5 +10,10 @@ def read_binary_file_bits(path) -> list:
     return binary_data
 
 path = "C:\\Users\\Utlisateur\\Desktop\\programmation\\thales\\ethernet.result_data"
-print(read_binary_file_bits(path))
+print(read_binary_file_bits(path)[0])
+fic = open("C:\\Users\\Utlisateur\\Desktop\\programmation\\thales\\output.txt", "w")
+#fic.write(read_binary_file_bits(path))
+fic.close()
 
+def read_octet():
+    ...
