@@ -108,15 +108,19 @@ def packet_date(fields_liste, decalage):
 
 
 def conv_ip(liste) -> tuple:
+
     octet_val_ip1 = []
     ipList = order_octet(liste)
     #print(ipList)
     val = 0
     octet_val_ip2 = []
+
     for i in range(0, 4):
         val = 0
+        print(ipList[i])
+        print(ipList[i][::-1])
         inv = ipList[i][::-1]
-        #print(inv)
+        #print(f"octet : {inv}")
         for i in range(0, 8):
             if inv[i] == 1:
                 val += 2**i
@@ -125,11 +129,12 @@ def conv_ip(liste) -> tuple:
     for i in range(4, 8):
         val = 0
         inv = ipList[i][::-1]
+        #print(f"octet : {inv}")
         for i in range(0, 8):
             if inv[i] == 1:
                 val += 2**i
         octet_val_ip2.append(val)    
-    return octet_val_ip1, octet_val_ip2    
+    return octet_val_ip1, octet_val_ip2      
 
 def lire_fields(liste, decalage) -> list:
     fields = []
@@ -246,7 +251,7 @@ def bin2hex(byte) -> str:
     return chaine
 
 def is_UDP():
-    path = "C:\\Users\\barfl\\Desktop\\saé_thalès\\ethernet.result_data"
+    path = "C:\\Users\\Utlisateur\\Desktop\\programmation\\thales\\ethernet.result_data"
     file = read_binary_file_bits(path)
     test = file[40*8:42*8]
     print(test)
@@ -261,12 +266,17 @@ def ecrire(result):
         fic.close()
 
 def extracteur_UDP() -> tuple:
+    _decalage = 1
     path = "C:\\Users\\barfl\\Desktop\\saé_thalès\\ethernet.result_data"
-    file_bin = read_binary_file_bits(path) #on garde le fichier binaire en mémoire pour rapidement y accéder et ne le lire qu'une seule fois
+    path2 = "C:\\Users\\Utlisateur\\Desktop\\programmation\\thales\\ethernet.result_data"
+
+    file_bin = read_binary_file_bits(path2) #on garde le fichier binaire en mémoire pour rapidement y accéder et ne le lire qu'une seule fois
     #secondes = frame_date(file_bin)
-    
+    i = 0
     while True:
-        date_exec = read_date(path)
+        i += 1
+        print(i)
+        date_exec = read_date(path2)
         size = taille_paquet(file_bin, _decalage)
         macs = lire_addr_mac(file_bin, _decalage)
         ips = lire_addr_ip(file_bin, _decalage)
@@ -276,7 +286,8 @@ def extracteur_UDP() -> tuple:
         _resultat = (date_exec, size, macs, ips, fields, FT, FT6)
         ecrire(_resultat)
 
-        
+        _resultat.append((date_exec, size, macs, ips, date, FT, FT6))
+        _decalage += size
 
 def extracteur_ARP(path):
     file_bin = read_binary_file_bits(path)
@@ -303,6 +314,10 @@ if __name__ == "__main__":
     #print(f"taille : {len(_resultat)}")
     if is_UDP():
         extracteur_UDP()
+        fic = open("C:\\Users\\Utlisateur\\Desktop\\programmation\\thales\\ethernet.result_data", "w")
+        for element in _resultat:
+            fic.write(str(element) + "\n")
+        fic.close()
     else:
         print("pas udp")
     #print(_resultat[262])
