@@ -4,8 +4,11 @@ import time
 import struct
 import threading
 
-_resultat = ()
+_resultat = []
 _decalage = 1
+path = "C:\\Users\\barfl\\Desktop\\saé_thalès\\ethernet.result_data"
+path_out = "C:\\Users\\barfl\\Desktop\\saé_thalès\\output.txt"
+path2 = "C:\\Users\\Utlisateur\\Desktop\\programmation\\thales\\ethernet.result_data"
 
 def read_binary_file_bits(path) -> list:
     with open(path, 'rb') as f:
@@ -89,16 +92,19 @@ def lire_addr_ip(liste, decalage) -> str: #octet 54 à 62
     addrIp2 = ""
     bdata = readBitsASoctet(liste, decalage + 54, decalage + 62)
     addresses = conv_ip(bdata)
-    s_addr = addresses[0]
-    d_addr = addresses[1]
-    for element in s_addr:
-        addrIp1 += str(element) + "."
-    for element in d_addr:
-        addrIp2 += str(element) + "."
-    addrIp1 = addrIp1[0:13]
-    addrIp2 = addrIp2[0:13]
+    if addresses == None:
+        return None
+    else:
+        s_addr = addresses[0]
+        d_addr = addresses[1]
+        for element in s_addr:
+            addrIp1 += str(element) + "."
+        for element in d_addr:
+            addrIp2 += str(element) + "."
+        addrIp1 = addrIp1[0:13]
+        addrIp2 = addrIp2[0:13]
 
-    return addrIp1, addrIp2
+        return addrIp1, addrIp2
 
 #lire packet date
 def packet_date(fields_liste, decalage):
@@ -109,32 +115,35 @@ def packet_date(fields_liste, decalage):
 
 def conv_ip(liste) -> tuple:
 
-    octet_val_ip1 = []
-    ipList = order_octet(liste)
-    #print(ipList)
-    val = 0
-    octet_val_ip2 = []
+    if len(liste) != 64:
+        return None
+    else:
+        octet_val_ip1 = []
+        ipList = order_octet(liste)
+        #print(ipList)
+        val = 0
+        octet_val_ip2 = []
 
-    for i in range(0, 4):
-        val = 0
-        print(ipList[i])
-        print(ipList[i][::-1])
-        inv = ipList[i][::-1]
-        #print(f"octet : {inv}")
-        for i in range(0, 8):
-            if inv[i] == 1:
-                val += 2**i
-        octet_val_ip1.append(val)
-    
-    for i in range(4, 8):
-        val = 0
-        inv = ipList[i][::-1]
-        #print(f"octet : {inv}")
-        for i in range(0, 8):
-            if inv[i] == 1:
-                val += 2**i
-        octet_val_ip2.append(val)    
-    return octet_val_ip1, octet_val_ip2      
+        for i in range(0, 4):
+            val = 0
+            print(ipList[i])
+            print(ipList[i][::-1])
+            inv = ipList[i][::-1]
+            #print(f"octet : {inv}")
+            for i in range(0, 8):
+                if inv[i] == 1:
+                    val += 2**i
+            octet_val_ip1.append(val)
+        
+        for i in range(4, 8):
+            val = 0
+            inv = ipList[i][::-1]
+            #print(f"octet : {inv}")
+            for i in range(0, 8):
+                if inv[i] == 1:
+                    val += 2**i
+            octet_val_ip2.append(val)    
+        return octet_val_ip1, octet_val_ip2      
 
 def lire_fields(liste, decalage) -> list:
     fields = []
@@ -251,7 +260,6 @@ def bin2hex(byte) -> str:
     return chaine
 
 def is_UDP():
-    path = "C:\\Users\\Utlisateur\\Desktop\\programmation\\thales\\ethernet.result_data"
     file = read_binary_file_bits(path)
     test = file[40*8:42*8]
     print(test)
@@ -265,37 +273,38 @@ def ecrire(result):
             fic.write(str(element))
         fic.close()
 
-def extracteur_UDP() -> tuple:
-    _decalage = 1
-    path = "C:\\Users\\barfl\\Desktop\\saé_thalès\\ethernet.result_data"
-    path2 = "C:\\Users\\Utlisateur\\Desktop\\programmation\\thales\\ethernet.result_data"
-
-    file_bin = read_binary_file_bits(path2) #on garde le fichier binaire en mémoire pour rapidement y accéder et ne le lire qu'une seule fois
-    #secondes = frame_date(file_bin)
-    i = 0
-    while True:
-        i += 1
-        print(i)
-        date_exec = read_date(path2)
-        size = taille_paquet(file_bin, _decalage)
-        macs = lire_addr_mac(file_bin, _decalage)
-        ips = lire_addr_ip(file_bin, _decalage)
-        fields = lire_fields(file_bin, _decalage)
-        FT = lire_FT(file_bin, _decalage)
-        FT6 = lire_FT6(file_bin, fields)
-        _resultat = (date_exec, size, macs, ips, fields, FT, FT6)
-        ecrire(_resultat)
-
-        _resultat.append((date_exec, size, macs, ips, date, FT, FT6))
-        _decalage += size
+def extracteur() -> tuple:
+    file_bin = read_binary_file_bits(path) #on garde le fichier binaire en mémoire pour rapidement y accéder et ne le lire qu'une seule fois
+    if is_UDP():
+        i = 0
+        while True:
+            i += 1
+            print(i)
+            ips = lire_addr_ip(file_bin, _decalage)
+            if ips == None:
+                return 0
+            else:
+                date_exec = read_date(path)
+                size = taille_paquet(file_bin, decal)
+                macs = lire_addr_mac(file_bin, decal)
+                fields = lire_fields(file_bin, decal)
+                FT = lire_FT(file_bin, decal)
+                FT6 = lire_FT6(file_bin, fields)
+                _resultat.append((date_exec, size, macs, ips, fields, FT, FT6))
+                decal += size
+                _decalage += decal
+    else:
+        extracteur_ARP()
 
 def extracteur_ARP(path):
     file_bin = read_binary_file_bits(path)
     date = read_date(path)
-    size = taille_paquet(file_bin, _decalage)
     macs = lire_addr_mac(file_bin, _decalage)
     ips = lire_addr_ip(file_bin, _decalage)
     date = packet_date(file_bin, _decalage)
+    fields = lire_fields(file_bin, _decalage)
+
+    _resultat.append((date, macs, ips, fields))
 
 def lire_rep(path):
     entete = []
@@ -312,12 +321,11 @@ def lire_rep(path):
 if __name__ == "__main__":
 
     #print(f"taille : {len(_resultat)}")
-    if is_UDP():
-        extracteur_UDP()
-        fic = open("C:\\Users\\Utlisateur\\Desktop\\programmation\\thales\\ethernet.result_data", "w")
-        for element in _resultat:
-            fic.write(str(element) + "\n")
-        fic.close()
-    else:
-        print("pas udp")
+
+    extracteur()
+    fic = open(path_out, "w")
+    for element in _resultat:
+        fic.write(str(element) + "\n")
+    fic.close()
+
     #print(_resultat[262])
