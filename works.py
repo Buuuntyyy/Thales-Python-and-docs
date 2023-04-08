@@ -5,7 +5,6 @@ import struct
 import threading
 
 _resultat = []
-_decalage = 1
 path = "C:\\Users\\barfl\\Desktop\\saé_thalès\\ethernet.result_data"
 path_out = "C:\\Users\\barfl\\Desktop\\output.txt"
 path2 = "C:\\Users\\Utlisateur\\Desktop\\programmation\\thales\\ethernet.result_data"
@@ -67,8 +66,11 @@ def read_date(path) -> str:
 
 #permet de lire la taille du paquet en octet
 def taille_paquet(liste, decalage) -> int:
+    print(f"{decalage} dans taille")
     array = readBitsASoctet(liste, decalage + 24, decalage + 28)
+    print(array)
     array = array[::-1]
+    print(bin2hex(array))
     return conv2dec(array)
 
 def lire_addr_mac(liste, decalage) -> int: #octet 28 à 40
@@ -260,11 +262,11 @@ def bin2hex(byte) -> str:
 def is_UDP():
     file = read_binary_file_bits(path)
     test = file[40*8:42*8]
-    print(test)
+    #print(test)
     #print(test)
     #print(bin2hex(test))
     t = bin2hex(test)
-    print(t)
+    #print(t)
     return t == "0800"
 
 def ecrire(result):
@@ -274,28 +276,27 @@ def ecrire(result):
         fic.close()
 
 def extracteur() -> tuple:
+    decalage_lec = 0
     file_bin = read_binary_file_bits(path) #on garde le fichier binaire en mémoire pour rapidement y accéder et ne le lire qu'une seule fois
     i = 0
     while True:
-        if is_UDP():
-            i += 1
-            print(i)
-            ips = lire_addr_ip(file_bin, _decalage)
-            if ips == None:
-                return 0
-            else:
-                date_exec = read_date(path)
-                size = taille_paquet(file_bin, _decalage)
-                macs = lire_addr_mac(file_bin, _decalage)
-                fields = lire_fields(file_bin, _decalage)
-                FT = lire_FT(file_bin, _decalage)
-                FT6 = lire_FT6(file_bin, fields)
-                _resultat.append((date_exec, size, macs, ips, fields, FT, FT6))
-                print(i)
+        print(f"{decalage_lec}==============")
+        i += 1
+        print(i)
+        ips = lire_addr_ip(file_bin, decalage_lec)
+        if ips == None:
+            return 0
         else:
-            print("ko")
-            extracteur_ARP(file_bin, _decalage)
-            i+=1
+            date_exec = read_date(path)
+            size = taille_paquet(file_bin, decalage_lec)
+            macs = lire_addr_mac(file_bin, decalage_lec)
+            fields = lire_fields(file_bin, decalage_lec)
+            FT = lire_FT(file_bin, decalage_lec)
+            FT6 = lire_FT6(file_bin, fields)
+            _resultat.append((date_exec, size, macs, ips, fields, FT, FT6))
+        decalage_lec += size
+        print(decalage_lec)
+
 
 def extracteur_ARP(fic, decalage):
     date = read_date(path)
@@ -314,7 +315,7 @@ def lire_rep(path):
         entete.append(line)
     rep = [entete[7][39:len(entete[7])], entete[8][39:len(entete[8])], entete[9][39:len(entete[9])], 
            entete[10][39:len(entete[10])], entete[14][39:len(entete[14])], entete[27][39:len(entete[27])]]
-    #print(rep)
+    print(rep)
 
     #le fichier rep doit être exactement comme donné lors des test. Aucun titre de ligne ne doit être changé
 
@@ -327,5 +328,6 @@ if __name__ == "__main__":
     for element in _resultat:
         fic.write(str(element) + "\n")
     fic.close()
+    print("fini")
 
     #print(_resultat[262])
