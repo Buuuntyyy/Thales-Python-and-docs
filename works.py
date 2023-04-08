@@ -9,6 +9,12 @@ path = "C:\\Users\\barfl\\Desktop\\saé_thalès\\ethernet.result_data"
 path_out = "C:\\Users\\barfl\\Desktop\\output.txt"
 path2 = "C:\\Users\\Utlisateur\\Desktop\\programmation\\thales\\ethernet.result_data"
 
+
+def transform_FT():
+    fic = open("C:\\Users\\barfl\\Desktop\\saé_thalès\\ethernet.result_data", "r")
+    to_transform = fic.readlines()
+    fic.close()
+    
 def read_binary_file_bits(path) -> list:
     with open(path, 'rb') as f:
         binary_data = f.read()
