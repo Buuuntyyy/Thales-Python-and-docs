@@ -88,7 +88,10 @@ def lire_addr_ip(liste, decalage) -> str: #octet 54 à 62
     addrIp1 = ""
     addrIp2 = ""
     bdata = readBitsASoctet(liste, decalage + 54, decalage + 62)
-    addresses = conv_ip(bdata)
+    try:
+        addresses = conv_ip(bdata)
+    except:
+        return None
     s_addr = addresses[0]
     d_addr = addresses[1]
     for element in s_addr:
@@ -247,7 +250,6 @@ def extracteur() -> tuple:
     path = "C:\\Users\\barfl\\Desktop\\saé_thalès\\ethernet.result_data"
     path2 = "C:\\Users\\Utlisateur\\Desktop\\programmation\\thales\\ethernet.result_data"
     file_bin = read_binary_file_bits(path) #on garde le fichier binaire en mémoire pour rapidement y accéder et ne le lire qu'une seule fois
-    print(file_bin)
     decalage = 0 #on initialise la variable de decalage à 0
     #secondes = frame_date(file_bin)
     #il faut boucler sur toute la trame --> while True:
@@ -259,6 +261,8 @@ def extracteur() -> tuple:
         size = taille_paquet(file_bin, decalage)
         macs = lire_addr_mac(file_bin, decalage)
         ips = lire_addr_ip(file_bin, decalage)
+        if ips == None:
+            break
         date = packet_date(file_bin, decalage)
         fields = lire_fields(file_bin, decalage)
         FT = lire_FT(file_bin, decalage)
@@ -274,6 +278,7 @@ def extracteur() -> tuple:
 if __name__ == "__main__":
     #print(f"taille : {len(_resultat)}")
 
+    extracteur()
     fic = open("C:\\Users\\barfl\\Desktop\\output.txt", "w")
 
     for element in _resultat:
