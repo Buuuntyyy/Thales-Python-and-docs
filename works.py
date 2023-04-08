@@ -66,11 +66,8 @@ def read_date(path) -> str:
 
 #permet de lire la taille du paquet en octet
 def taille_paquet(liste, decalage) -> int:
-    print(f"{decalage} dans taille")
     array = readBitsASoctet(liste, decalage + 24, decalage + 28)
-    print(array)
     array = array[::-1]
-    print(bin2hex(array))
     return conv2dec(array)
 
 def lire_addr_mac(liste, decalage) -> int: #octet 28 à 40
@@ -93,20 +90,20 @@ def lire_addr_ip(liste, decalage) -> str: #octet 54 à 62
     addrIp1 = ""
     addrIp2 = ""
     bdata = readBitsASoctet(liste, decalage + 54, decalage + 62)
-    addresses = conv_ip(bdata)
-    if addresses == None:
+    try:
+        addresses = conv_ip(bdata)
+    except IndexError:
         return None
-    else:
-        s_addr = addresses[0]
-        d_addr = addresses[1]
-        for element in s_addr:
-            addrIp1 += str(element) + "."
-        for element in d_addr:
-            addrIp2 += str(element) + "."
-        addrIp1 = addrIp1[0:13]
-        addrIp2 = addrIp2[0:13]
+    s_addr = addresses[0]
+    d_addr = addresses[1]
+    for element in s_addr:
+        addrIp1 += str(element) + "."
+    for element in d_addr:
+        addrIp2 += str(element) + "."
+    addrIp1 = addrIp1[0:13]
+    addrIp2 = addrIp2[0:13]
 
-        return addrIp1, addrIp2
+    return addrIp1, addrIp2
 
 #lire packet date
 def packet_date(fields_liste, decalage):
@@ -117,33 +114,30 @@ def packet_date(fields_liste, decalage):
 
 def conv_ip(liste) -> tuple:
 
-    if len(liste) != 64:
-        return None
-    else:
-        octet_val_ip1 = []
-        ipList = order_octet(liste)
-        #print(ipList)
-        val = 0
-        octet_val_ip2 = []
+    octet_val_ip1 = []
+    ipList = order_octet(liste)
+    #print(ipList)
+    val = 0
+    octet_val_ip2 = []
 
-        for i in range(0, 4):
-            val = 0
-            inv = ipList[i][::-1]
-            #print(f"octet : {inv}")
-            for i in range(0, 8):
-                if inv[i] == 1:
-                    val += 2**i
-            octet_val_ip1.append(val)
-        
-        for i in range(4, 8):
-            val = 0
-            inv = ipList[i][::-1]
-            #print(f"octet : {inv}")
-            for i in range(0, 8):
-                if inv[i] == 1:
-                    val += 2**i
-            octet_val_ip2.append(val)    
-        return octet_val_ip1, octet_val_ip2      
+    for i in range(0, 4):
+        val = 0
+        inv = ipList[i][::-1]
+        #print(f"octet : {inv}")
+        for i in range(0, 8):
+            if inv[i] == 1:
+                val += 2**i
+        octet_val_ip1.append(val)
+    
+    for i in range(4, 8):
+        val = 0
+        inv = ipList[i][::-1]
+        #print(f"octet : {inv}")
+        for i in range(0, 8):
+            if inv[i] == 1:
+                val += 2**i
+        octet_val_ip2.append(val)    
+    return octet_val_ip1, octet_val_ip2      
 
 def lire_fields(liste, decalage) -> list:
     fields = []
@@ -278,11 +272,7 @@ def ecrire(result):
 def extracteur() -> tuple:
     decalage_lec = 0
     file_bin = read_binary_file_bits(path) #on garde le fichier binaire en mémoire pour rapidement y accéder et ne le lire qu'une seule fois
-    i = 0
     while True:
-        print(f"{decalage_lec}==============")
-        i += 1
-        print(i)
         ips = lire_addr_ip(file_bin, decalage_lec)
         if ips == None:
             return 0
@@ -294,8 +284,7 @@ def extracteur() -> tuple:
             FT = lire_FT(file_bin, decalage_lec)
             FT6 = lire_FT6(file_bin, fields)
             _resultat.append((date_exec, size, macs, ips, fields, FT, FT6))
-        decalage_lec += size
-        print(decalage_lec)
+        decalage_lec = decalage_lec + size + 28
 
 
 def extracteur_ARP(fic, decalage):
