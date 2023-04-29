@@ -3,6 +3,7 @@ import binascii
 import time
 import struct
 import threading
+import mysql.connector
 
 _resultat = []
 path = "C:\\Users\\barfl\\Desktop\\saé_thalès\\ethernet.result_data"
@@ -324,5 +325,9 @@ if __name__ == "__main__":
         fic.write(str(element) + "\n")
     fic.close()
     print("fini")
+    conn = mysql.connector.connect(host="localhost",user="root",password="XXX", database="test1")
+    cursor = conn.cursor()
+    info = {"name": "olivier", "age" : "34"}
+    cursor.execute("""INSERT INTO udp (name, age) VALUES(%(name)s, %(age)s)""", info)
 
     #print(_resultat[262])
