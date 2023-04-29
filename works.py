@@ -260,9 +260,9 @@ def bin2hex(byte) -> str:
     
     return chaine
 
-def is_UDP():
+def is_UDP(decalage):
     file = read_binary_file_bits(path)
-    test = file[40*8:42*8]
+    test = file[(40+decalage)*8:(42+decalage)*8]
     #print(test)
     #print(test)
     #print(bin2hex(test))
@@ -292,6 +292,15 @@ def extracteur() -> tuple:
             FT6 = lire_FT6(file_bin, fields)
             _resultat.append((date_exec, size, macs, ips, fields, FT, FT6))
         decalage_lec = decalage_lec + size + 28
+        conn = mysql.connector.connect(host="localhost",user="invite",password="invite", database="thales")
+        cursor = conn.cursor()
+        info = {"name": "olivier", "age" : "34"}
+        cursor.execute("""INSERT INTO udp (frame_date, bench_3, bench_5, frame_size, adresse_mac_dest, adresse_mac_source, 
+        Field_1, Field_2, Field_3, Field_4, Field_5, Field_6, Field_7, adresse_ip_source, adresse_ip_dest, Field_9, Field_10, Field_11, 
+        Field_14, Field_16, Field_17, Field_18, Field_20, Field_21, Field_23, Field_25, Field_26, Field_28, Field_29, Field_30, 
+        Field_32, Field_33_34_35, packet_date, ft_6) 
+        VALUES(%(name)s, %(age)s)""", info)
+
 
 
 def extracteur_ARP(fic, decalage):
@@ -325,9 +334,4 @@ if __name__ == "__main__":
         fic.write(str(element) + "\n")
     fic.close()
     print("fini")
-    conn = mysql.connector.connect(host="localhost",user="root",password="XXX", database="test1")
-    cursor = conn.cursor()
-    info = {"name": "olivier", "age" : "34"}
-    cursor.execute("""INSERT INTO udp (name, age) VALUES(%(name)s, %(age)s)""", info)
-
     #print(_resultat[262])
