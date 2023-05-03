@@ -287,6 +287,8 @@ def extracteur() -> tuple:
             date_exec = read_date(path)
             size = taille_paquet(file_bin, decalage_lec)
             macs = lire_addr_mac(file_bin, decalage_lec)
+            mac_s = macs[0]
+            mac_d = macs[1]
             fields = lire_fields(file_bin, decalage_lec)
             FT = lire_FT(file_bin, decalage_lec)
             FT6 = lire_FT6(file_bin, fields)
@@ -295,11 +297,16 @@ def extracteur() -> tuple:
         conn = mysql.connector.connect(host="localhost",user="invite",password="invite", database="thales")
         cursor = conn.cursor()
         info = {"name": "olivier", "age" : "34"}
-        cursor.execute("""INSERT INTO udp (frame_date, bench_3, bench_5, frame_size, adresse_mac_dest, adresse_mac_source, 
-        Field_1, Field_2, Field_3, Field_4, Field_5, Field_6, Field_7, adresse_ip_source, adresse_ip_dest, Field_9, Field_10, Field_11, 
+        sql = ("INSERT INTO udp (frame_date, frame_size, adresse_mac_dest, adresse_mac_source) VALUES(%s, %s, %s, %s)")
+        val = (date_exec, size, mac_d, mac_s)
+
+        cursor.execute(sql, val)
+        conn.commit()
+        
+        #suite de la requête sql
+"""                Field_1, Field_2, Field_3, Field_4, Field_5, Field_6, Field_7, adresse_ip_source, adresse_ip_dest, Field_9, Field_10, Field_11, 
         Field_14, Field_16, Field_17, Field_18, Field_20, Field_21, Field_23, Field_25, Field_26, Field_28, Field_29, Field_30, 
-        Field_32, Field_33_34_35, packet_date, ft_6) 
-        VALUES(%(name)s, %(age)s)""", info)
+        Field_32, Field_33_34_35, packet_date, ft_6) """
 
 
 
