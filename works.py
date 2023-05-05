@@ -289,6 +289,8 @@ def extracteur() -> tuple:
             macs = lire_addr_mac(file_bin, decalage_lec)
             mac_s = macs[0]
             mac_d = macs[1]
+            ip_s = ips[0]
+            ip_d = ips[1]
             fields = lire_fields(file_bin, decalage_lec)
             FT = lire_FT(file_bin, decalage_lec)
             FT6 = lire_FT6(file_bin, fields)
@@ -298,7 +300,7 @@ def extracteur() -> tuple:
         cursor = conn.cursor()
         info = {"name": "olivier", "age" : "34"}
         sql = ("INSERT INTO udp (frame_date, frame_size, adresse_mac_dest, adresse_mac_source) VALUES(%s, %s, %s, %s)")
-        val = (date_exec, size, mac_d, mac_s)
+        val = (date_exec, size, mac_d, mac_s, fields[0], fields[2], fields[3], fields[4], fields[5], fields[6], fields[7]? )
 
         cursor.execute(sql, val)
         conn.commit()
