@@ -222,8 +222,12 @@ def lire_FT6(FT_liste, fields_liste) -> list:
     FT6.append(FT_liste[2])
     FT6.append(FT_liste[3])
     FT6.append(FT_liste[4])
-    FT6.append(fields_liste[21])
-    return FT6
+    for element in fields_liste[21]:
+        FT6.append(element)
+    ch = ""
+    for i in range(0, len(FT6)):
+        ch+= str(FT6[i])
+    return ch
 
 #permet de convertir un octet en décimal
 def bin2deci(liste) -> int:
@@ -296,14 +300,16 @@ def extracteur() -> tuple:
             FT6 = lire_FT6(file_bin, fields)
             _resultat.append((date_exec, size, macs, ips, fields, FT, FT6))
         decalage_lec = decalage_lec + size + 28
-        conn = mysql.connector.connect(host="localhost",user="invite",password="invite", database="thales")
+"""        conn = mysql.connector.connect(host="localhost",user="invite",password="invite", database="thales")
         cursor = conn.cursor()
         info = {"name": "olivier", "age" : "34"}
         sql = ("INSERT INTO udp (frame_date, frame_size, adresse_mac_dest, adresse_mac_source) VALUES(%s, %s, %s, %s)")
-        val = (date_exec, size, mac_d, mac_s, fields[0], fields[2], fields[3], fields[4], fields[5], fields[6], fields[7]? )
+        val = (date_exec, size, mac_d, mac_s, fields[0], fields[2], fields[3], fields[4], fields[5], fields[6], fields[7], ip_s, ip_d, fields[9], fields[10], fields[11],
+               fields[14], fields[16], fields[17], fields[18], fields[20], fields[21], fields[23], fields[25], fields[26], fields[28], fields[29],
+                fields[30], fields[32], )
 
         cursor.execute(sql, val)
-        conn.commit()
+        conn.commit()"""
         
         #suite de la requête sql
 """                Field_1, Field_2, Field_3, Field_4, Field_5, Field_6, Field_7, adresse_ip_source, adresse_ip_dest, Field_9, Field_10, Field_11, 
