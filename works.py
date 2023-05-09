@@ -340,9 +340,6 @@ def extracteur() -> tuple:
         cursor.execute(sql, val2)
         conn.commit()
 
-        for i in range(0, 10):
-            print(_resultat[0][1])
-
 def extracteur_ARP(fic, decalage):
     date = read_date(path)
     macs = lire_addr_mac(fic, decalage)
@@ -373,5 +370,8 @@ if __name__ == "__main__":
     for element in _resultat:
         fic.write(str(element) + "\n")
     fic.close()
+
+    for i in range(0, 10):
+        print(_resultat[i][1])
     print("fini")
     #print(_resultat[262])
