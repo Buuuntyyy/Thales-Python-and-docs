@@ -48,8 +48,6 @@ def read_octet(bytes_array, num_octet_deb, num_octet_fin) -> list:
 #permet de lire le fichiers en considérant des groupes de bits comme octet.
 def readBitsASoctet(liste, OctetDeb, OctetFin) -> list:#l'octet 1 se trouve à l'index 0
     toRead = liste[OctetDeb*8:OctetFin*8]
-    #toRead = toRead[::-1] #on inverse la liste pour avoir les bonnes puissances de 2
-    #print(type(toRead))
     return toRead
 
 #convertit les octets en entrée en décimal et retourne cette valeur
@@ -148,64 +146,59 @@ def conv_ip(liste) -> tuple:
 
 def lire_fields(liste, decalage) -> list:
     fields = []
-    fields.append(readBitsASoctet(liste, decalage + 40, decalage +42)) #field 1
-    fields.append(readBitsASoctet(liste, decalage +42, decalage +44)) #field 2
-    fields.append(readBitsASoctet(liste, decalage +44, decalage +46)) #field 3
-    fields.append(readBitsASoctet(liste, decalage +46, decalage +48)) #field 4
-    fields.append(readBitsASoctet(liste, decalage +48, decalage +50)) #field 5
-    fields.append(readBitsASoctet(liste, decalage +50, decalage +51)) #field 6
-    fields.append(readBitsASoctet(liste, decalage +51, decalage +52)) #field 7
+    fields.append(bin2deci(readBitsASoctet(liste, decalage + 40, decalage +42))) #field 1
+    fields.append(bin2deci(readBitsASoctet(liste, decalage +42, decalage +44))) #field 2
+    fields.append(bin2deci(readBitsASoctet(liste, decalage +44, decalage +46))) #field 3
+    fields.append(bin2deci(readBitsASoctet(liste, decalage +46, decalage +48))) #field 4
+    fields.append(bin2deci(readBitsASoctet(liste, decalage +48, decalage +50))) #field 5
+    fields.append(bin2deci(readBitsASoctet(liste, decalage +50, decalage +51))) #field 6
+    fields.append(bin2deci(readBitsASoctet(liste, decalage +51, decalage +52))) #field 7
     #octets IP et à ignorer
-    fields.append(readBitsASoctet(liste, decalage +62, decalage +64)) #field 9
-    fields.append(readBitsASoctet(liste, decalage +64, decalage +66)) #field 10
-    fields.append(readBitsASoctet(liste, decalage +66, decalage +68)) #field 11
+    fields.append(bin2deci(readBitsASoctet(liste, decalage +62, decalage +64))) #field 9
+    fields.append(bin2deci(readBitsASoctet(liste, decalage +64, decalage +66))) #field 10
+    fields.append(bin2deci(readBitsASoctet(liste, decalage +66, decalage +68))) #field 11
 
     #octets 68 à 70 => ignorer, 70 à 74 séparés en plusieurs fieds/FT
     #octets 70 à 72 (71 et 72 inclus) : fields 14, 16, 17, 18
         #field 14 : 1 bit (4ème bit de l'octet)
-    fields.append(readBitsASoctet(liste, decalage +71, decalage +72)) # => bit 564 #liste[563]
+    fields.append(bin2deci(readBitsASoctet(liste, decalage +71, decalage +72))) # => bit 564 #liste[563]
         #field 16 : 3 bits (Bits 6 à 8 inclus)
-    fields.append(readBitsASoctet(liste, decalage +71, decalage +72)) #liste[564:566]
+    fields.append(bin2deci(readBitsASoctet(liste, decalage +71, decalage +72))) #liste[564:566]
         #field 17 : 3 bits (Bits 9 à 11 inclus)
-    fields.append(readBitsASoctet(liste, decalage +71, decalage +72)) #liste[567:569]
+    fields.append(bin2deci(readBitsASoctet(liste, decalage +71, decalage +72))) #liste[567:569]
         #field 18 : 5 bits (Bits 12 à 16 inclus)
-    fields.append(readBitsASoctet(liste, decalage +71, decalage +72)) #liste[570:574]
+    fields.append(bin2deci(readBitsASoctet(liste, decalage +71, decalage +72))) #liste[570:574]
     #otets 72 à 74 (73 et 74 inclus) : field 20
         #field 20 : 14 bits (bits 3 à 16 inclus)
-    fields.append(readBitsASoctet(liste, decalage +71, decalage +72)) #liste[578:594]
+    fields.append(bin2deci(readBitsASoctet(liste, decalage +71, decalage +72))) #liste[578:594]
 
-    fields.append(readBitsASoctet(liste, decalage +74, decalage +76)) #field 21
+    fields.append(bin2deci(readBitsASoctet(liste, decalage +74, decalage +76))) #field 21
 
     #field 22 à ignorer
-
+    
     #octets 76 à 77 (77 inclu seulement) : field 23, 25, 26
         #field 23 : 1 bit (5eme bit)
-    fields.append((liste[decalage +613:decalage +614]))
+    fields.append(bin2deci(liste[decalage +613:decalage +614]))
         #field 25 : 1 bit (7eme bit)
-    fields.append((liste[decalage +614:decalage +615]))
+    fields.append(bin2deci(liste[decalage +614:decalage +615]))
         #field 26 : 1 bit (8eme bit)
-    fields.append((liste[decalage +615:decalage +616]))
+    fields.append(bin2deci(liste[decalage +615:decalage +616]))
     #octets 77 à 78 (78 inclu seulement): field 27, 28
         #field 28 : 6 bits (6 derniers bits)
-    fields.append((liste[decalage +618:decalage +623]))
+    fields.append(bin2deci(liste[decalage +618:decalage +623]))
     #octet 78 à 80 (79 et 80 inclus) : fields 29, 30
         #field 29 : 6 bits (6 premiers bits)
-    fields.append((liste[decalage +624:decalage +629]))
+    fields.append(bin2deci(liste[decalage +624:decalage +629]))
         #field 30 : 10 bits (10 derniers bits)
-    fields.append((liste[decalage +630:decalage +639]))
+    fields.append(bin2deci(liste[decalage +630:decalage +639]))
     #octet 81 à ignorer
 
     #fields.append(readBitsASoctet(liste, decalage +81, decalage +82)) #octet 82 -> field 32 & FT_1
     #fields.append(readBitsASoctet(liste, decalage +82, decalage +84)) #octet 83 et 84 === field 33
     #fields.append(readBitsASoctet(liste, decalage +84, decalage +86)) #octets 85 et 86 === field 34 #83 à 88 = packet_date
     #fields.append(readBitsASoctet(liste, decalage +86, decalage +88)) #octets 87 et 88 === field 35
-    fields_str = []
-    for i in range(0, len(fields)):
-        ch = ""
-        for n in range(0, len(fields[i])):
-            ch+= str(fields[i][n])
-        fields_str.append(ch)
-    return fields_str
+    return fields
+
 
 def lire_FT(liste, decalage) -> list:
     FT_val = []
@@ -216,17 +209,17 @@ def lire_FT(liste, decalage) -> list:
     FT_val.append(liste[decalage +623:decalage +629]) #FT_4
     FT_val.append(liste[decalage +567:decalage +580]) #FT_5
     FT_val.append(liste[decalage +563]) #FT_7
+    FT_val.append(liste[decalage +630:decalage +639]) #field30
 
     return FT_val
 
-def lire_FT6(FT_liste, fields_liste) -> list:
+def lire_FT6(FT_liste, fields_liste, liste) -> list:
     FT6 = []
     FT6.append(FT_liste[6])
     FT6.append(FT_liste[2])
     FT6.append(FT_liste[3])
     FT6.append(FT_liste[4])
-    for element in fields_liste[21]:
-        FT6.append(element)
+    FT6.append(FT_liste[7])
     ch = ""
     for i in range(0, len(FT6)):
         ch+= str(FT6[i])
@@ -235,16 +228,22 @@ def lire_FT6(FT_liste, fields_liste) -> list:
 #permet de convertir un octet en décimal
 def bin2deci(liste) -> int:
     val = 0
-    for octet in liste:
-        inv = octet[::-1]
-        #print(f"octet après : {inv}")
-        for i in range(0, len()):
+    if len(liste) == 1:
+        val = 1
+        return val
+    elif liste[1] != None:
+        inv = liste[::-1]
+        for i in range(0, len(liste)):
             if inv[i] == 1:
                 val += 2**i
-                #print(f"val : {2**i}")
-                #print(f"dans val on a : {val}")
-    #print(f"val = {val}")
-    return val
+        return val
+    else:
+        for octet in liste:
+            inv = octet[::-1]
+            for i in range(0, len(inv)):
+                if inv[i] == 1:
+                    val += 2**i
+        return val
 
 #permet de convertir 1 octet donné en hexadécimal, la liste en entrée doit être préalablement inversée
 def bin2hex(byte) -> str:
@@ -300,7 +299,7 @@ def extracteur() -> tuple:
             ip_d = ips[1]
             fields = lire_fields(file_bin, decalage_lec)
             FT = lire_FT(file_bin, decalage_lec)
-            FT6 = lire_FT6(file_bin, fields)
+            FT6 = lire_FT6(FT, fields, file_bin)
             _resultat.append((date_exec, size, macs, ips, fields, FT, FT6))
         decalage_lec = decalage_lec + size + 28        
         conn = mysql.connector.connect(host="localhost",user="root",password="", database="thales") #ajouter les valeurs du bench2 et bench3
