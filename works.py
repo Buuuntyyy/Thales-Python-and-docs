@@ -336,20 +336,12 @@ def extracteur() -> tuple:
         
         
         sql = 'INSERT INTO udp(frame_date, frame_size, adresse_mac_dest, adresse_mac_source, Field_1, Field_2, Field_3, Field_4, Field_5, Field_6, Field_7, adresse_ip_source, adresse_ip_dest, Field_9, Field_10, Field_11, Field_14, Field_16, Field_17, Field_18, Field_20, Field_21, Field_23, Field_25, Field_26, Field_28, Field_29, Field_30, ft_6) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
-        #sql = """INSERT INTO udp(frame_date, frame_size, adresse_mac_dest, adresse_mac_source, Field_1, Field_2, Field_3, Field_4, Field_5, 
-        #Field_6, Field_7, adresse_ip_source, adresse_ip_dest, Field_9, Field_10, Field_11, Field_14, Field_16, Field_17, Field_18, Field_20, 
-        #Field_21, Field_23, Field_25, Field_26, Field_28, Field_29, Field_30, ft_6) 
-        #VALUES('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')"""
 
         cursor.execute(sql, val2)
         conn.commit()
-        
-        #suite de la requête sql
-"""                Field_1, Field_2, Field_3, Field_4, Field_5, Field_6, Field_7, adresse_ip_source, adresse_ip_dest, Field_9, Field_10, Field_11, 
-        Field_14, Field_16, Field_17, Field_18, Field_20, Field_21, Field_23, Field_25, Field_26, Field_28, Field_29, Field_30, 
-        Field_32, Field_33_34_35, packet_date, ft_6) """
 
-
+        for i in range(0, 10):
+            print(_resultat[0][1])
 
 def extracteur_ARP(fic, decalage):
     date = read_date(path)
