@@ -281,8 +281,9 @@ def extracteur() -> tuple:
     decalage_lec = 0
     file_bin = read_binary_file_bits(path) #on garde le fichier binaire en mémoire pour rapidement y accéder et ne le lire qu'une seule fois
     while True:
-        if is_UDP(decalage_lec, file_bin):
+        if not is_UDP(decalage_lec, file_bin):
             extracteur_ARP(file_bin, decalage_lec)
+            print("arp")
         else:
             ips = lire_addr_ip(file_bin, decalage_lec)
             if ips == None:
@@ -346,15 +347,12 @@ def extracteur_ARP(fic, decalage):
     macs = lire_addr_mac(fic, decalage)
     mac_s = macs[0]
     mac_d = macs[1]
-    ips = lire_addr_ip(fic, decalage)
-    ip_s = ips[0]
-    ip_d = ips[1]
-    date = packet_date(fic, decalage)
+    date_frame = packet_date(fic, decalage)
     fields = lire_fields(fic, decalage)
 
-    _resultat.append((date, macs, ips, fields))
+    _resultat.append((date, macs, fields))
 
-    valarp = ((date), (size), (mac_d), (mac_s)) #on lit que jusqu'au field 30, rajouter field 33_34_35 et field 32
+    valarp = (date, size, mac_d, mac_s) #on lit que jusqu'au field 30, rajouter field 33_34_35 et field 32
 
     sql = 'INSERT INTO arp(frame_date, frame_size, adresse_mac_dest, adresse_mac_source) VALUES(%s, %s, %s, %s)'
 
