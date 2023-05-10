@@ -228,7 +228,9 @@ def lire_FT6(FT_liste, fields_liste, liste) -> list:
 #permet de convertir un octet en décimal
 def bin2deci(liste) -> int:
     val = 0
-    if len(liste) == 1:
+    if len(liste)==0:
+        return val
+    elif len(liste) == 1:
         val = 1
         return val
     elif liste[1] != None:
@@ -280,7 +282,7 @@ def ecrire(result):
 def extracteur() -> tuple:
     decalage_lec = 0
     file_bin = read_binary_file_bits(path) #on garde le fichier binaire en mémoire pour rapidement y accéder et ne le lire qu'une seule fois
-    while True:
+    while file_bin[decalage_lec]!=None:
         if not is_UDP(decalage_lec, file_bin):
             extracteur_ARP(file_bin, decalage_lec)
             print("arp")
