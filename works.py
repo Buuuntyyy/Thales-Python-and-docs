@@ -281,65 +281,63 @@ def ecrire(result):
 
 def extracteur() -> tuple:
     decalage_lec = 0
+    cpt = 0
     file_bin = read_binary_file_bits(path) #on garde le fichier binaire en mémoire pour rapidement y accéder et ne le lire qu'une seule fois
-    while file_bin[decalage_lec]!=None:
-        if not is_UDP(decalage_lec, file_bin):
-            extracteur_ARP(file_bin, decalage_lec)
-            print("arp")
-        else:
-            ips = lire_addr_ip(file_bin, decalage_lec)
-            if ips == None:
-                return 0
-            else:
-                date_exec = read_date(path)
-                size = taille_paquet(file_bin, decalage_lec)
-                macs = lire_addr_mac(file_bin, decalage_lec)
-                mac_s = macs[0]
-                mac_d = macs[1]
-                ip_s = ips[0]
-                ip_d = ips[1]
-                fields = lire_fields(file_bin, decalage_lec)
-                FT = lire_FT(file_bin, decalage_lec)
-                FT6 = lire_FT6(FT, fields, file_bin)
-                _resultat.append((date_exec, size, macs, ips, fields, FT, FT6))
-            decalage_lec = decalage_lec + size + 28        
-            conn = mysql.connector.connect(host="localhost",user="root",password="", database="thales") #ajouter les valeurs du bench2 et bench3
-            cursor = conn.cursor()
-            f1 = fields[0]
-            f2 = fields[1]
-            f3 = fields[2]
-            f4 = fields[3]
-            f5 = fields[4]
-            f6 = fields[5]
-            f7 = fields[6]
-            f8 = fields[7]
-            f9 = fields[8]
-            f10 = fields[9]
-            f11= fields[10]
-            f12 = fields[11]
-            f13 = fields[12]
-            f14 = fields[13]
-            f15 = fields[14]
-            f16 = fields[15]
-            f17 = fields[16]
-            f18 = fields[17]
-            f19 = fields[18]
-            f20 = fields[19]
-            f21 = fields[20]
-            f22 = fields[21]
+    taille = len(file_bin)
+    while cpt<5481:
 
-            val = ((date_exec), (size), (mac_d), (mac_s), (fields[0]), (fields[1]), (fields[2]), (fields[3]), (fields[4]), (fields[5]), 
-            (fields[6]), ip_s, ip_d, (fields[7]), (fields[8]), (fields[9]), (fields[10]), (fields[11]), (fields[12]), (fields[13]), 
-            (fields[14]), (fields[15]), (fields[16]), (fields[17]), (fields[18]), (fields[19]), (fields[20]), (fields[21]), FT6) #on lit que jusqu'au field 30, rajouter field 33_34_35 et field 32
+        ips = lire_addr_ip(file_bin, decalage_lec)
+        if ips == None:
+            return 0
+        date_exec = read_date(path)
+        size = taille_paquet(file_bin, decalage_lec)
+        macs = lire_addr_mac(file_bin, decalage_lec)
+        mac_s = macs[0]
+        mac_d = macs[1]
+        ip_s = ips[0]
+        ip_d = ips[1]
+        fields = lire_fields(file_bin, decalage_lec)
+        FT = lire_FT(file_bin, decalage_lec)
+        FT6 = lire_FT6(FT, fields, file_bin)
+        _resultat.append((date_exec, size, macs, ips, fields, FT, FT6))
+        decalage_lec = decalage_lec + size + 28        
+        conn = mysql.connector.connect(host="localhost",user="root",password="", database="thales") #ajouter les valeurs du bench2 et bench3
+        cursor = conn.cursor()
+        f1 = fields[0]
+        f2 = fields[1]
+        f3 = fields[2]
+        f4 = fields[3]
+        f5 = fields[4]
+        f6 = fields[5]
+        f7 = fields[6]
+        f8 = fields[7]
+        f9 = fields[8]
+        f10 = fields[9]
+        f11= fields[10]
+        f12 = fields[11]
+        f13 = fields[12]
+        f14 = fields[13]
+        f15 = fields[14]
+        f16 = fields[15]
+        f17 = fields[16]
+        f18 = fields[17]
+        f19 = fields[18]
+        f20 = fields[19]
+        f21 = fields[20]
+        f22 = fields[21]
 
-            val2 = (date_exec, size, mac_d, mac_s, f1, f2, f3, f4, f5, f6, f7, ip_s, ip_d, f8, f9, f10, f11, f12, f13, f14, f15, f16, 
-                    f17, f18, f19, f20, f21, f22, FT6) #on lit que jusqu'au field 30, rajouter field 33_34_35 et field 32
-            
-            
-            sql = 'INSERT INTO udp(frame_date, frame_size, adresse_mac_dest, adresse_mac_source, Field_1, Field_2, Field_3, Field_4, Field_5, Field_6, Field_7, adresse_ip_source, adresse_ip_dest, Field_9, Field_10, Field_11, Field_14, Field_16, Field_17, Field_18, Field_20, Field_21, Field_23, Field_25, Field_26, Field_28, Field_29, Field_30, ft_6) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
+        val = ((date_exec), (size), (mac_d), (mac_s), (fields[0]), (fields[1]), (fields[2]), (fields[3]), (fields[4]), (fields[5]), 
+        (fields[6]), ip_s, ip_d, (fields[7]), (fields[8]), (fields[9]), (fields[10]), (fields[11]), (fields[12]), (fields[13]), 
+        (fields[14]), (fields[15]), (fields[16]), (fields[17]), (fields[18]), (fields[19]), (fields[20]), (fields[21]), FT6) #on lit que jusqu'au field 30, rajouter field 33_34_35 et field 32
 
-            cursor.execute(sql, val2)
-            conn.commit()
+        val2 = (date_exec, size, mac_d, mac_s, f1, f2, f3, f4, f5, f6, f7, ip_s, ip_d, f8, f9, f10, f11, f12, f13, f14, f15, f16, 
+                f17, f18, f19, f20, f21, f22, FT6) #on lit que jusqu'au field 30, rajouter field 33_34_35 et field 32
+        
+        
+        sql = 'INSERT INTO udp(frame_date, frame_size, adresse_mac_dest, adresse_mac_source, Field_1, Field_2, Field_3, Field_4, Field_5, Field_6, Field_7, adresse_ip_source, adresse_ip_dest, Field_9, Field_10, Field_11, Field_14, Field_16, Field_17, Field_18, Field_20, Field_21, Field_23, Field_25, Field_26, Field_28, Field_29, Field_30, ft_6) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
+
+        cursor.execute(sql, val2)
+        conn.commit()
 
 def extracteur_ARP(fic, decalage):
     conn = mysql.connector.connect(host="localhost",user="root",password="", database="thales") #ajouter les valeurs du bench2 et bench3
