@@ -277,13 +277,7 @@ def is_UDP(decalage, liste):
         print("0806")
     return t == "0800"
 
-def ecrire(result):
-        fic = open("C:\\Users\\barfl\\Documents\\GitHub\\thales\\output.txt", "a")
-        for element in result:
-            fic.write(str(element))
-        fic.close()
-
-def extracteur() -> tuple:
+def extracteur():
     decalage_lec = 0
     file_bin = read_binary_file_bits(path) #on garde le fichier binaire en mémoire pour rapidement y accéder et ne le lire qu'une seule fois
     taille = len(file_bin)
@@ -339,12 +333,12 @@ def extracteur() -> tuple:
         (fields[6]), ip_s, ip_d, (fields[7]), (fields[8]), (fields[9]), (fields[10]), (fields[11]), (fields[12]), (fields[13]), 
         (fields[14]), (fields[15]), (fields[16]), (fields[17]), (fields[18]), (fields[19]), (fields[20]), (fields[21]), FT6) #on lit que jusqu'au field 30, rajouter field 33_34_35 et field 32
 
-        val2 = (date_exec, size, mac_d, mac_s, f1, f2, f3, f4, f5, f6, f7, ip_s, ip_d, f8, f9, f10, f11, f12, f13, f14, f15, f16, 
+        valudp = (date_exec, size, mac_d, mac_s, f1, f2, f3, f4, f5, f6, f7, ip_s, ip_d, f8, f9, f10, f11, f12, f13, f14, f15, f16, 
                 f17, f18, f19, f20, f21, f22, FT6) #on lit que jusqu'au field 30, rajouter field 33_34_35 et field 32
 
-        sql = 'INSERT INTO udp(frame_date, frame_size, adresse_mac_dest, adresse_mac_source, Field_1, Field_2, Field_3, Field_4, Field_5, Field_6, Field_7, adresse_ip_source, adresse_ip_dest, Field_9, Field_10, Field_11, Field_14, Field_16, Field_17, Field_18, Field_20, Field_21, Field_23, Field_25, Field_26, Field_28, Field_29, Field_30, ft_6) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
+        sql = 'INSERT INTO udp1(frame_date, frame_size, adresse_mac_dest, adresse_mac_source, Field_1, Field_2, Field_3, Field_4, Field_5, Field_6, Field_7, adresse_ip_source, adresse_ip_dest, Field_9, Field_10, Field_11, Field_14, Field_16, Field_17, Field_18, Field_20, Field_21, Field_23, Field_25, Field_26, Field_28, Field_29, Field_30, ft_6) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
 
-        cursor.execute(sql, val2)
+        cursor.execute(sql, valudp)
         conn.commit()
         conn.close()
 
@@ -363,7 +357,7 @@ def extracteur_ARP(fic, decalage):
 
     valarp = (date, size, mac_d, mac_s) #on lit que jusqu'au field 30, rajouter field 33_34_35 et field 32
 
-    sql = 'INSERT INTO arp(frame_date, frame_size, adresse_mac_dest, adresse_mac_source) VALUES(%s, %s, %s, %s)'
+    sql = 'INSERT INTO arp1(frame_date, frame_size, adresse_mac_dest, adresse_mac_source) VALUES(%s, %s, %s, %s)'
 
     cursor.execute(sql, valarp)
     conn.commit()
@@ -375,23 +369,54 @@ def lire_rep(path):
     for i in range(0, 28):
         line = fic.readline()
         entete.append(line)
-    rep = [entete[7][39:len(entete[7])], entete[8][39:len(entete[8])], entete[9][39:len(entete[9])], 
-           entete[10][39:len(entete[10])], entete[14][39:len(entete[14])], entete[27][39:len(entete[27])]]
-    print(rep)
 
-    #le fichier rep doit être exactement comme donné lors des test. Aucun titre de ligne ne doit être changé
+    rep = {
+        "Tested SW": entete[7][40:len(entete[7])],
+        "Tested SW version": entete[8][40:len(entete[8])],
+        "SDB version": entete[9][40:len(entete[9])],
+        "SGSE version": entete[10][40:len(entete[10])],
+        "date": entete[14][40:len(entete[14])],
+        "name": entete[27][40:len(entete[27])]
+    }
+    print(rep)
+    return rep
+
+def conversion_dataBench(path_rep_fic, ):
+    extracteur()
 
 if __name__ == "__main__":
+    path_rep = input("Insérer le chemin absolu du fichier .rep : ")
+    if len(path_rep) < 2:
+        nom_test = input("Entrer un nom pour le test : ")
+        date_test = str(datetime.datetime.now())
+        valtest2 = (nom_test, date_test)
 
-    #print(f"taille : {len(_resultat)}")
+    else:
+        data = lire_rep(path_rep)
+
+        nom_test = data['name']
+        date_test = data['date']
+
+    print(date_test, nom_test)
+    conn = mysql.connector.connect(host="localhost",user="root",password="", database="thales")
+    cursor = conn.cursor()
+    valtest = (nom_test, date_test)
+
+    sql1 = 'INSERT INTO test(nom_test, date) VALUES(%s, %s)'
+
+    cursor.execute(sql1, valtest)
+    conn.commit()
+    conn.close()
+
+    if len(path_rep) > 2:
+        conn = mysql.connector.connect(host="localhost",user="root",password="", database="thales")
+        cursor = conn.cursor()
+        valtest3 = (data['Tested SW'], data['Tested SW version'], data['SDB version'], data['SGSE version'], data['name'], data['date'])
+
+        sql3 = 'INSERT INTO fichier(type_obsw, version_obsw, version_bds, type_moyen, date_exec, nom) VALUES(%s, %s, %s, %s, %s, %s)'
+
+        cursor.execute(sql3, valtest3)
+        conn.commit()
+        conn.close()
 
     extracteur()
-    fic = open(path_out, "w")
-    for element in _resultat:
-        fic.write(str(element) + "\n")
-    fic.close()
-
-    for i in range(0, 10):
-        print(_resultat[i][1])
-    print("fini")
-    #print(_resultat[262])
