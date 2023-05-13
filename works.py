@@ -300,7 +300,7 @@ def extracteur():
         _resultat.append((date_exec, size, macs, ips, fields, FT, FT6))
         decalage_lec = decalage_lec + size + 28   
 
-        conn = mysql.connector.connect(host="localhost",user="root",password="", database="thales") #ajouter les valeurs du bench2 et bench3
+        conn = mysql.connector.connect(host="localhost",user="flavien",password="flavien", database="thales") #ajouter les valeurs du bench2 et bench3
         cursor = conn.cursor()
 
         if arp_udp == "0806":
@@ -333,10 +333,10 @@ def extracteur():
         (fields[6]), ip_s, ip_d, (fields[7]), (fields[8]), (fields[9]), (fields[10]), (fields[11]), (fields[12]), (fields[13]), 
         (fields[14]), (fields[15]), (fields[16]), (fields[17]), (fields[18]), (fields[19]), (fields[20]), (fields[21]), FT6) #on lit que jusqu'au field 30, rajouter field 33_34_35 et field 32
 
-        valudp = (date_exec, size, mac_d, mac_s, f1, f2, f3, f4, f5, f6, f7, ip_s, ip_d, f8, f9, f10, f11, f12, f13, f14, f15, f16, 
-                f17, f18, f19, f20, f21, f22, FT6) #on lit que jusqu'au field 30, rajouter field 33_34_35 et field 32
+        valudp = (date_exec, " ", " ", size, mac_d, mac_s, f1, f2, f3, f4, f5, f6, f7, ip_s, ip_d, f8, f9, f10, f11, f12, f13, f14, f15, f16, 
+                f17, f18, f19, f20, f21, f22, " ", " ", FT6, " ") #on lit que jusqu'au field 30, rajouter field 33_34_35 et field 32
 
-        sql = 'INSERT INTO udp1(frame_date, frame_size, adresse_mac_dest, adresse_mac_source, Field_1, Field_2, Field_3, Field_4, Field_5, Field_6, Field_7, adresse_ip_source, adresse_ip_dest, Field_9, Field_10, Field_11, Field_14, Field_16, Field_17, Field_18, Field_20, Field_21, Field_23, Field_25, Field_26, Field_28, Field_29, Field_30, ft_6) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
+        sql = 'INSERT INTO udp(frame_date, bench_3, bench_5, frame_size, adresse_mac_dest, adresse_mac_source, Field_1, Field_2, Field_3, Field_4, Field_5, Field_6, Field_7, adresse_ip_source, adresse_ip_dest, Field_9, Field_10, Field_11, Field_14, Field_16, Field_17, Field_18, Field_20, Field_21, Field_23, Field_25, Field_26, Field_28, Field_29, Field_30, Field_32, Field_33_34_35, ft_6, packet_date) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
 
         cursor.execute(sql, valudp)
         conn.commit()
@@ -398,18 +398,18 @@ if __name__ == "__main__":
         date_test = data['date']
 
     print(date_test, nom_test)
-    conn = mysql.connector.connect(host="localhost",user="root",password="", database="thales")
+    conn = mysql.connector.connect(host="localhost",user="flavien",password="flavien", database="thales")
     cursor = conn.cursor()
     valtest = (nom_test, date_test)
 
-    sql1 = 'INSERT INTO test(nom_test, date) VALUES(%s, %s)'
+    sql1 = 'INSERT INTO test(nom_test, date_test) VALUES(%s, %s)'
 
     cursor.execute(sql1, valtest)
     conn.commit()
     conn.close()
 
     if len(path_rep) > 2:
-        conn = mysql.connector.connect(host="localhost",user="root",password="", database="thales")
+        conn = mysql.connector.connect(host="localhost",user="flavien",password="flavien", database="thales")
         cursor = conn.cursor()
         valtest3 = (data['Tested SW'], data['Tested SW version'], data['SDB version'], data['SGSE version'], data['name'], data['date'])
 
