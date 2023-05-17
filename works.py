@@ -3,7 +3,7 @@ import binascii
 import time
 import struct
 import threading
-import mysql.connector
+from mysql import connector
 
 _resultat = []
 #path = "C:\\Users\\barfl\\Desktop\\saé_thalès\\ethernet.result_data"
@@ -300,7 +300,7 @@ def extracteur():
         _resultat.append((date_exec, size, macs, ips, fields, FT, FT6))
         decalage_lec = decalage_lec + size + 28   
 
-        conn = mysql.connector.connect(host="localhost",user="flavien",password="flavien", database="thales") #ajouter les valeurs du bench2 et bench3
+        conn = connector.connect(host="localhost",user="root",password="", database="thales") #ajouter les valeurs du bench2 et bench3
         cursor = conn.cursor()
 
         if arp_udp == "0806":
@@ -343,7 +343,7 @@ def extracteur():
         conn.close()
 
 def extracteur_ARP(fic, decalage):
-    conn = mysql.connector.connect(host="localhost",user="root",password="", database="thales") #ajouter les valeurs du bench2 et bench3
+    conn = connector.connect(host="localhost",user="root",password="", database="thales") #ajouter les valeurs du bench2 et bench3
     cursor = conn.cursor()
     date = read_date(path)
     size = taille_paquet(fic, decalage)
@@ -398,18 +398,27 @@ if __name__ == "__main__":
         date_test = data['date']
 
     print(date_test, nom_test)
-    conn = mysql.connector.connect(host="localhost",user="root",password="", database="thales")
+    conn = connector.connect(host="localhost",user="root",password="", database="thales")
     cursor = conn.cursor()
     valtest = (nom_test, date_test)
 
-    sql1 = 'INSERT INTO test(nom_test, date_test) VALUES(%s, %s)'
+    sql1 = 'INSERT INTO test(nom_test, date) VALUES(%s, %s)'
 
     cursor.execute(sql1, valtest)
     conn.commit()
     conn.close()
 
+    conn = connector.connect(host="localhost",user="root",password="", database="thales")
+    cursor = conn.cursor()
+
+    sql4 = 'INSERT INTO test_ref(ref) VALUES(100)'
+
+    cursor.execute(sql4)
+    conn.commit()
+    conn.close()
+
     if len(path_rep) > 2:
-        conn = mysql.connector.connect(host="localhost",user="root",password="", database="thales")
+        conn = connector.connect(host="localhost",user="root",password="", database="thales")
         cursor = conn.cursor()
         valtest3 = (data['Tested SW'], data['Tested SW version'], data['SDB version'], data['SGSE version'], data['name'], data['date'])
 
@@ -419,4 +428,4 @@ if __name__ == "__main__":
         conn.commit()
         conn.close()
 
-    #extracteur()
+    extracteur()
