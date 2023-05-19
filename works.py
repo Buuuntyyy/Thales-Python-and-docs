@@ -277,7 +277,7 @@ def is_UDP(decalage, liste):
         print("0806")
     return t == "0800"
 
-def extracteur():
+def extracteur(cursor):
     decalage_lec = 0
     file_bin = read_binary_file_bits(path) #on garde le fichier binaire en mémoire pour rapidement y accéder et ne le lire qu'une seule fois
     taille = len(file_bin)
@@ -300,12 +300,14 @@ def extracteur():
         _resultat.append((date_exec, size, macs, ips, fields, FT, FT6))
         decalage_lec = decalage_lec + size + 28   
 
-        conn = connector.connect(host="localhost",user="root",password="", database="thales") #ajouter les valeurs du bench2 et bench3
-        cursor = conn.cursor()
+        req = "SELECT max(test_id) FROM test"
+        cursor.execute(req)
+        id = (cursor.fetchall()[0][0])
+        print(id)
 
         if arp_udp == "0806":
             print("arp")
-            extracteur_ARP(file_bin, decalage_lec)
+            extracteur_ARP(file_bin, decalage_lec, id)
         f1 = fields[0]
         f2 = fields[1]
         f3 = fields[2]
@@ -334,15 +336,14 @@ def extracteur():
         (fields[14]), (fields[15]), (fields[16]), (fields[17]), (fields[18]), (fields[19]), (fields[20]), (fields[21]), FT6) #on lit que jusqu'au field 30, rajouter field 33_34_35 et field 32
 
         valudp = (date_exec, " ", " ", size, mac_d, mac_s, f1, f2, f3, f4, f5, f6, f7, ip_s, ip_d, f8, f9, f10, f11, f12, f13, f14, f15, f16, 
-                f17, f18, f19, f20, f21, f22, " ", " ", FT6, " ") #on lit que jusqu'au field 30, rajouter field 33_34_35 et field 32
+                f17, f18, f19, f20, f21, f22, " ", " ", FT6, " ", id) #on lit que jusqu'au field 30, rajouter field 33_34_35 et field 32
 
-        sql = 'INSERT INTO udp1(frame_date, bench_3, bench_5, frame_size, adresse_mac_dest, adresse_mac_source, Field_1, Field_2, Field_3, Field_4, Field_5, Field_6, Field_7, adresse_ip_source, adresse_ip_dest, Field_9, Field_10, Field_11, Field_14, Field_16, Field_17, Field_18, Field_20, Field_21, Field_23, Field_25, Field_26, Field_28, Field_29, Field_30, Field_32, Field_33_34_35, ft_6, packet_date) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
+        sql = 'INSERT INTO udp1(frame_date, bench_3, bench_5, frame_size, adresse_mac_dest, adresse_mac_source, Field_1, Field_2, Field_3, Field_4, Field_5, Field_6, Field_7, adresse_ip_source, adresse_ip_dest, Field_9, Field_10, Field_11, Field_14, Field_16, Field_17, Field_18, Field_20, Field_21, Field_23, Field_25, Field_26, Field_28, Field_29, Field_30, Field_32, Field_33_34_35, ft_6, packet_date, id_test) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
 
         cursor.execute(sql, valudp)
-        conn.commit()
-        conn.close()
 
-def extracteur_ARP(fic, decalage):
+
+def extracteur_ARP(fic, decalage, id_num):
     conn = connector.connect(host="localhost",user="root",password="", database="thales") #ajouter les valeurs du bench2 et bench3
     cursor = conn.cursor()
     date = read_date(path)
@@ -355,9 +356,9 @@ def extracteur_ARP(fic, decalage):
 
     _resultat.append((date, macs, fields))
 
-    valarp = (date, size, mac_d, mac_s) #on lit que jusqu'au field 30, rajouter field 33_34_35 et field 32
+    valarp = (date, size, mac_d, mac_s, id_num) #on lit que jusqu'au field 30, rajouter field 33_34_35 et field 32
 
-    sql = 'INSERT INTO arp1(frame_date, frame_size, adresse_mac_dest, adresse_mac_source) VALUES(%s, %s, %s, %s)'
+    sql = 'INSERT INTO arp1(frame_date, frame_size, adresse_mac_dest, adresse_mac_source, id_test) VALUES(%s, %s, %s, %s, %s)'
 
     cursor.execute(sql, valarp)
     conn.commit()
@@ -397,35 +398,77 @@ if __name__ == "__main__":
         nom_test = data['name']
         date_test = data['date']
 
-    print(date_test, nom_test)
-    conn = connector.connect(host="localhost",user="root",password="", database="thales")
-    cursor = conn.cursor()
-    valtest = (nom_test, date_test)
+    #Ici on vérifie si le nom du test existe deja dans la bdd:
+    verif = connector.connect(host="localhost",user="root",password="", database="thales")
+    cv = verif.cursor()
 
-    sql1 = 'INSERT INTO test(nom_test, date) VALUES(%s, %s)'
+    #on vérifie si le nom du test existe deja, si c'est le cas on récupère le test_id
+    sql1 = 'SELECT count(*), test_id FROM test WHERE nom_test IN (\'' + nom_test + '\')'
+    cv.execute(sql1)
+    res = cv.fetchall()
+    nb_occ = res[0][0]
+    id_test_occ = res[0][1]
+    print(nb_occ, id_test_occ)
+    verif.commit()
+    verif.close()
 
-    cursor.execute(sql1, valtest)
-    conn.commit()
-    conn.close()
+    #ensuite, si ca apparaît au moins 1 fois :
+    if nb_occ > 0:
+        #Il s'agit d'une nouvelle exécution d'un test deja connu, on l'enregistre dans Execution en faisant référence à son test_id
+            old = connector.connect(host="localhost",user="root",password="", database="thales")
+            old_conn = old.cursor()
 
-    conn = connector.connect(host="localhost",user="root",password="", database="thales")
-    cursor = conn.cursor()
-
-    sql4 = 'INSERT INTO test_ref(ref) VALUES(100)'
-
-    cursor.execute(sql4)
-    conn.commit()
-    conn.close()
-
-    if len(path_rep) > 2:
+            sql1=("INSERT INTO execution (id_test) VALUES ({})".format(id_test_occ))
+            old_conn.execute(sql1)
+            old.commit()
+            old.close()
+    else:
+        #c'est un nouveau test qui n'a jamais été exécuté, on l'enregistre dans Test et dans Execution
         conn = connector.connect(host="localhost",user="root",password="", database="thales")
         cursor = conn.cursor()
-        valtest3 = (data['Tested SW'], data['Tested SW version'], data['SDB version'], data['SGSE version'], data['name'], data['date'])
+        valtest = (nom_test, date_test)
 
-        sql3 = 'INSERT INTO fichier(type_obsw, version_obsw, version_bds, type_moyen, date_exec, nom) VALUES(%s, %s, %s, %s, %s, %s)'
+        sql1 = 'INSERT INTO test(nom_test, date) VALUES(%s, %s)'
+
+        cursor.execute(sql1, valtest)
+
+        req = "SELECT max(test_id) FROM test"
+        cursor.execute(req)
+        id = (cursor.fetchall()[0][0])
+
+        sql2=("INSERT INTO execution (id_test) VALUES ({})".format(id))
+        print(id_test_occ)
+        cursor.execute(sql2)
+        conn.commit()
+        conn.close()
+
+    #on ajoute une condition de vérification : chaque exécution du code python sera stockée dans la table "exécution"
+    #En revanche, chacune de ces exécutions sera lié à un test par la relation "id_test", et chaque test aura un identifiant unique.
+    #Ainsi un test pourra avoir N exécutions.
+    #Pour ce faire, on compare le nom contenu dans l'execution actuelle avec les noms des test déja présent :
+    #Si le nom existe deja, alors il s'agira d'une exécution supplémentaire
+    #Sinon, il s'agit d'un nouveau test et de sa première exécution.
+    if len(path_rep) > 2:
+        id_conn = connector.connect(host="localhost",user="root",password="", database="thales")
+        cursor = id_conn.cursor()
+        req = "SELECT max(test_id) FROM test"
+        cursor.execute(req)
+        id = (cursor.fetchall()[0][0])
+        id_conn.commit()
+        id_conn.close()
+
+        conn = connector.connect(host="localhost",user="root",password="", database="thales")
+        cursor = conn.cursor()
+        valtest3 = (data['Tested SW'], data['Tested SW version'], data['SDB version'], data['SGSE version'], data['date'], data['name'], id)
+
+        sql3 = 'INSERT INTO fichier(type_obsw, version_obsw, version_bds, type_moyen, date_exec, nom, id_test) VALUES(%s, %s, %s, %s, %s, %s, %s)'
 
         cursor.execute(sql3, valtest3)
         conn.commit()
         conn.close()
-
-    extracteur()
+    print("ok")
+    conn = connector.connect(host="localhost",user="root",password="", database="thales") #ajouter les valeurs du bench2 et bench3
+    cursor = conn.cursor()
+    extracteur(cursor)
+    conn.commit()
+    conn.close()
