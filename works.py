@@ -277,7 +277,7 @@ def is_UDP(decalage, liste):
         print("0806")
     return t == "0800"
 
-def extracteur(cursor):
+def extracteur(cursor, id_exec):
     decalage_lec = 0
     file_bin = read_binary_file_bits(path) #on garde le fichier binaire en mémoire pour rapidement y accéder et ne le lire qu'une seule fois
     taille = len(file_bin)
@@ -307,7 +307,7 @@ def extracteur(cursor):
 
         if arp_udp == "0806":
             #print("arp")
-            extracteur_ARP(file_bin, decalage_lec, id)
+            extracteur_ARP(file_bin, decalage_lec, id, id_exec)
         f1 = fields[0]
         f2 = fields[1]
         f3 = fields[2]
@@ -331,19 +331,15 @@ def extracteur(cursor):
         f21 = fields[20]
         f22 = fields[21]
 
-        val = ((date_exec), (size), (mac_d), (mac_s), (fields[0]), (fields[1]), (fields[2]), (fields[3]), (fields[4]), (fields[5]), 
-        (fields[6]), ip_s, ip_d, (fields[7]), (fields[8]), (fields[9]), (fields[10]), (fields[11]), (fields[12]), (fields[13]), 
-        (fields[14]), (fields[15]), (fields[16]), (fields[17]), (fields[18]), (fields[19]), (fields[20]), (fields[21]), FT6) #on lit que jusqu'au field 30, rajouter field 33_34_35 et field 32
-
         valudp = (date_exec, " ", " ", size, mac_d, mac_s, f1, f2, f3, f4, f5, f6, f7, ip_s, ip_d, f8, f9, f10, f11, f12, f13, f14, f15, f16, 
-                f17, f18, f19, f20, f21, f22, " ", " ", FT6, " ", id) #on lit que jusqu'au field 30, rajouter field 33_34_35 et field 32
+                f17, f18, f19, f20, f21, f22, " ", " ", FT6, " ", id, id_exec) #on lit que jusqu'au field 30, rajouter field 33_34_35 et field 32
 
-        sql = 'INSERT INTO udp1(frame_date, bench_3, bench_5, frame_size, adresse_mac_dest, adresse_mac_source, Field_1, Field_2, Field_3, Field_4, Field_5, Field_6, Field_7, adresse_ip_source, adresse_ip_dest, Field_9, Field_10, Field_11, Field_14, Field_16, Field_17, Field_18, Field_20, Field_21, Field_23, Field_25, Field_26, Field_28, Field_29, Field_30, Field_32, Field_33_34_35, ft_6, packet_date, id_test) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
+        sql = 'INSERT INTO udp1(frame_date, bench_3, bench_5, frame_size, adresse_mac_dest, adresse_mac_source, Field_1, Field_2, Field_3, Field_4, Field_5, Field_6, Field_7, adresse_ip_source, adresse_ip_dest, Field_9, Field_10, Field_11, Field_14, Field_16, Field_17, Field_18, Field_20, Field_21, Field_23, Field_25, Field_26, Field_28, Field_29, Field_30, Field_32, Field_33_34_35, ft_6, packet_date, id_test, id_exec) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
 
         cursor.execute(sql, valudp)
 
 
-def extracteur_ARP(fic, decalage, id_num):
+def extracteur_ARP(fic, decalage, id_num, id_exec_arp):
     conn = connector.connect(host="localhost",user="root",password="", database="thales") #ajouter les valeurs du bench2 et bench3
     cursor = conn.cursor()
     date = read_date(path)
@@ -356,9 +352,9 @@ def extracteur_ARP(fic, decalage, id_num):
 
     _resultat.append((date, macs, fields))
 
-    valarp = (date, size, mac_d, mac_s, id_num) #on lit que jusqu'au field 30, rajouter field 33_34_35 et field 32
+    valarp = (date, size, mac_d, mac_s, id_num, id_exec_arp) #on lit que jusqu'au field 30, rajouter field 33_34_35 et field 32
 
-    sql = 'INSERT INTO arp1(frame_date, frame_size, adresse_mac_dest, adresse_mac_source, id_test) VALUES(%s, %s, %s, %s, %s)'
+    sql = 'INSERT INTO arp1(frame_date, frame_size, adresse_mac_dest, adresse_mac_source, id_test, id_exec) VALUES(%s, %s, %s, %s, %s, %s)'
 
     cursor.execute(sql, valarp)
     conn.commit()
@@ -472,6 +468,10 @@ if __name__ == "__main__":
     #print("ok")
     conn = connector.connect(host="localhost",user="root",password="", database="thales") #ajouter les valeurs du bench2 et bench3
     cursor = conn.cursor()
-    extracteur(cursor)
+    
+    sql_exec = "SELECT max(exec_id) FROM execution"
+    cursor.execute(sql_exec)
+    id_exec = cursor.fetchall()
+    extracteur(cursor, id_exec[0][0])
     conn.commit()
     conn.close()
