@@ -417,8 +417,10 @@ if __name__ == "__main__":
         #Il s'agit d'une nouvelle exécution d'un test deja connu, on l'enregistre dans Execution en faisant référence à son test_id
             old = connector.connect(host="localhost",user="root",password="", database="thales")
             old_conn = old.cursor()
+            dateEx = str(datetime.datetime.now())
+            valexec = (id_test_occ, dateEx)
 
-            sql1=("INSERT INTO execution (id_test) VALUES ({})".format(id_test_occ))
+            sql1=("INSERT INTO execution (id_test, date_exec) VALUES (%s, %s)")
             old_conn.execute(sql1)
             old.commit()
             old.close()
@@ -435,10 +437,11 @@ if __name__ == "__main__":
         req = "SELECT max(test_id) FROM test"
         cursor.execute(req)
         id = (cursor.fetchall()[0][0])
-
-        sql2=("INSERT INTO execution (id_test) VALUES ({})".format(id))
+        dateEx = str(datetime.datetime.now())
+        valexec = (id, dateEx)
+        sql2="INSERT INTO execution (id_test, date_exec) VALUES (%s, %s)"
         print(id_test_occ)
-        cursor.execute(sql2)
+        cursor.execute(sql2, valexec)
         conn.commit()
         conn.close()
 
