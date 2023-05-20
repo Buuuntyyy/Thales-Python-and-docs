@@ -303,10 +303,10 @@ def extracteur(cursor):
         req = "SELECT max(test_id) FROM test"
         cursor.execute(req)
         id = (cursor.fetchall()[0][0])
-        print(id)
+        #print(id)
 
         if arp_udp == "0806":
-            print("arp")
+            #print("arp")
             extracteur_ARP(file_bin, decalage_lec, id)
         f1 = fields[0]
         f2 = fields[1]
@@ -379,7 +379,7 @@ def lire_rep(path):
         "date": entete[14][40:len(entete[14])],
         "name": entete[27][40:len(entete[27])]
     }
-    print(rep)
+    #print(rep)
     return rep
 
 def conversion_dataBench(path_rep_fic, ):
@@ -408,7 +408,7 @@ if __name__ == "__main__":
     res = cv.fetchall()
     nb_occ = res[0][0]
     id_test_occ = res[0][1]
-    print(nb_occ, id_test_occ)
+    #print(nb_occ, id_test_occ)
     verif.commit()
     verif.close()
 
@@ -421,7 +421,7 @@ if __name__ == "__main__":
             valexec = (id_test_occ, dateEx)
 
             sql1=("INSERT INTO execution (id_test, date_exec) VALUES (%s, %s)")
-            old_conn.execute(sql1)
+            old_conn.execute(sql1, valexec)
             old.commit()
             old.close()
     else:
@@ -440,7 +440,7 @@ if __name__ == "__main__":
         dateEx = str(datetime.datetime.now())
         valexec = (id, dateEx)
         sql2="INSERT INTO execution (id_test, date_exec) VALUES (%s, %s)"
-        print(id_test_occ)
+        #print(id_test_occ)
         cursor.execute(sql2, valexec)
         conn.commit()
         conn.close()
@@ -469,7 +469,7 @@ if __name__ == "__main__":
         cursor.execute(sql3, valtest3)
         conn.commit()
         conn.close()
-    print("ok")
+    #print("ok")
     conn = connector.connect(host="localhost",user="root",password="", database="thales") #ajouter les valeurs du bench2 et bench3
     cursor = conn.cursor()
     extracteur(cursor)
