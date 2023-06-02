@@ -378,7 +378,7 @@ def lire_rep(path):
     #print(rep)
     return rep
 
-def conversion_dataBench(path_rep_fic, ):
+def conversion_dataBench(path_rep_fic):
     extracteur()
 
 if __name__ == "__main__":
