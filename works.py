@@ -4,7 +4,7 @@ import time
 import struct
 import threading
 from mysql import connector
-from fonctions.py import *
+from fonctions import *
 
 if __name__ == "__main__":
     path_rep = input("Insérer le chemin absolu du fichier .rep : ")
