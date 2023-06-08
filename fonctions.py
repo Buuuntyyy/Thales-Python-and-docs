@@ -214,7 +214,7 @@ def lire_FT(liste, decalage) -> list:
 
     return FT_val
 
-def lire_FT6(FT_liste, fields_liste, liste) -> list:
+def lire_FT6(FT_liste, fields_liste, liste) -> str:
     FT6 = []
     FT6.append(FT_liste[6])
     FT6.append(FT_liste[2])
@@ -286,6 +286,7 @@ def extracteur(cursor, id_exec):
             return 0
         benches = lire_dataBench(file_bin, decalage_lec)
         date_exec = read_date(path)
+        print(date_exec)
         size = taille_paquet(file_bin, decalage_lec)
         macs = lire_addr_mac(file_bin, decalage_lec)
         mac_s = macs[0]

@@ -6,19 +6,28 @@ import threading
 from mysql import connector
 from fonctions import *
 import ft_fonctions
+import sys #nécessaire pour récupérer les paramètres en ligne de commande
 
 if __name__ == "__main__":
-    path_rep = input("Insérer le chemin absolu du fichier .rep : ")
-    if len(path_rep) < 2:
-        nom_test = input("Entrer un nom pour le test : ")
-        date_test = str(datetime.datetime.now())
-        valtest2 = (nom_test, date_test)
 
+    if len(sys.argv) < 1:
+        print("Error : file path or name test required")
+        exit()
+    elif len(sys.argv) < 3:
+        try: #on vérifie si le paramètre est un chemin ou le nom d'un test
+            open(sys.argv[1], "r")        
+            data = lire_rep(sys.argv[1]) #Si le paramètre est un chemin, on lit le fichier rep et on extrait les données nécessaires
+            nom_test = data['name']
+            date_test = data['date']
+            is_path = True
+
+        except AttributeError: #Si on obtient AttributeError, alors le paramètre n'est pas un chemin, ou le fichier n'existe pas. Donc le paramètre est considéré comme étant le nom du test
+            date_test = str(datetime.datetime.now()) #On récupère la date d'aujourd'hui
+            valtest2 = (sys.argv[1], date_test)#on met en Tuple le couple nom_test et date_test
+            is_path = False
     else:
-        data = lire_rep(path_rep)
-
-        nom_test = data['name']
-        date_test = data['date']
+         print("Error : too much parameter (file-path, test-name)")
+         exit()
 
     #Ici on vérifie si le nom du test existe deja dans la bdd:
     verif = connector.connect(host="localhost",user="root",password="", database="thales")
@@ -73,7 +82,7 @@ if __name__ == "__main__":
     #Pour ce faire, on compare le nom contenu dans l'execution actuelle avec les noms des test déja présent :
     #Si le nom existe deja, alors il s'agira d'une exécution supplémentaire
     #Sinon, il s'agit d'un nouveau test et de sa première exécution.
-    if len(path_rep) > 2:
+    if is_path: #Si le paramètre était bien un fichier, on importe ses données utiles dans la BDD
         id_conn = connector.connect(host="localhost",user="root",password="", database="thales")
         cursor = id_conn.cursor()
         req = "SELECT max(test_id) FROM test"
@@ -91,8 +100,7 @@ if __name__ == "__main__":
         cursor.execute(sql3, valtest3)
         conn.commit()
         conn.close()
-    #print("ok")
-    conn = connector.connect(host="localhost",user="root",password="", database="thales") #ajouter les valeurs du bench2 et bench3
+    conn = connector.connect(host="localhost",user="root",password="", database="thales")
     cursor = conn.cursor()
     
     sql_exec = "SELECT max(exec_id) FROM execution"
