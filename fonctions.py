@@ -279,13 +279,12 @@ def is_UDP(decalage, liste):
 def extracteur(cursor, id_exec):
     decalage_lec = 0
     file_bin = read_binary_file_bits(path) #on garde le fichier binaire en mémoire pour rapidement y accéder et ne le lire qu'une seule fois
-    taille = len(file_bin)
-    print(taille)
     while True:
         arp_udp = bin2hex(file_bin[(40+decalage_lec)*8:(42+decalage_lec)*8])
         ips = lire_addr_ip(file_bin, decalage_lec)
         if ips == None:
             return 0
+        benches = lire_dataBench(file_bin, decalage_lec)
         date_exec = read_date(path)
         size = taille_paquet(file_bin, decalage_lec)
         macs = lire_addr_mac(file_bin, decalage_lec)
@@ -329,7 +328,7 @@ def extracteur(cursor, id_exec):
         f21 = fields[20]
         f22 = fields[21]
 
-        valudp = (date_exec, " ", " ", size, mac_d, mac_s, f1, f2, f3, f4, f5, f6, f7, ip_s, ip_d, f8, f9, f10, f11, f12, f13, f14, f15, f16, 
+        valudp = (date_exec, benches[0], benches[3], size, macs[1], macs[0], f1, f2, f3, f4, f5, f6, f7, ip_s, ip_d, f8, f9, f10, f11, f12, f13, f14, f15, f16, 
                 f17, f18, f19, f20, f21, f22, " ", " ", FT6, " ", id, id_exec) #on lit que jusqu'au field 30, rajouter field 33_34_35 et field 32
 
         sql = 'INSERT INTO udp1(frame_date, bench_3, bench_5, frame_size, adresse_mac_dest, adresse_mac_source, Field_1, Field_2, Field_3, Field_4, Field_5, Field_6, Field_7, adresse_ip_source, adresse_ip_dest, Field_9, Field_10, Field_11, Field_14, Field_16, Field_17, Field_18, Field_20, Field_21, Field_23, Field_25, Field_26, Field_28, Field_29, Field_30, Field_32, Field_33_34_35, ft_6, packet_date, id_test, id_exec) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
@@ -375,5 +374,11 @@ def lire_rep(path):
     #print(rep)
     return rep
 
-def conversion_dataBench(path_rep_fic, ):
-    extracteur()
+def lire_dataBench(liste, decalage):
+    bench3 = readBitsASoctet(liste, decalage +16, decalage +20) #bits 128 à 160
+    convb3 = bin2deci(bench3)
+
+    bench5 = liste[decalage+172:decalage+175] #bits 172 à 175
+    convb5 = bin2deci(bench5)
+
+    return bench3, bench5
