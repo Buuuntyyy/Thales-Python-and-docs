@@ -112,10 +112,10 @@ def lire_addr_ip(liste, decalage) -> str: #octet 54 à 62
     return addrIp1, addrIp2
 
 #lire packet date
-def packet_date(fields_liste, decalage):
+def packet_date(liste, decalage):
     packet_dateListe = []
-    for i in range(decalage + 19,decalage + 22):
-        packet_dateListe.append(fields_liste[i])
+    date = readBitsASoctet(liste, 44+decalage, 50+decalage)
+    return date
 
 
 def conv_ip(liste) -> tuple:
@@ -210,17 +210,21 @@ def lire_FT(liste, decalage) -> list:
     FT_val.append(liste[decalage +623:decalage +629]) #FT_4
     FT_val.append(liste[decalage +567:decalage +580]) #FT_5
     FT_val.append(liste[decalage +563]) #FT_7
-    FT_val.append(liste[decalage +630:decalage +639]) #field30
+    FT_val.append(liste[decalage +630:decalage +640]) #field30
 
     return FT_val
 
 def lire_FT6(FT_liste, fields_liste, liste) -> list:
     FT6 = []
     FT6.append(FT_liste[6])
-    FT6.append(FT_liste[2])
-    FT6.append(FT_liste[3])
-    FT6.append(FT_liste[4])
-    FT6.append(FT_liste[7])
+    for i in range(0, 5):
+        FT6.append(FT_liste[2][i])
+    for i in range(0, 6):
+        FT6.append(FT_liste[3][i])
+    for i in range(0, 6):
+        FT6.append(FT_liste[4][i])
+    for i in range(0, 10):
+        FT6.append(FT_liste[7][i])
     ch = ""
     for i in range(0, len(FT6)):
         ch+= str(FT6[i])
@@ -295,13 +299,17 @@ def extracteur(cursor, id_exec):
         fields = lire_fields(file_bin, decalage_lec)
         FT = lire_FT(file_bin, decalage_lec)
         FT6 = lire_FT6(FT, fields, file_bin)
+        print(FT6)
+        
+        FT1 = ""
+        for i in range(0, 8):
+            FT1 += str(FT[1][i])
         decalage_lec = decalage_lec + size + 28   
-
+        print(FT1)
         req = "SELECT max(test_id) FROM test"
         cursor.execute(req)
         id = (cursor.fetchall()[0][0])
         #print(id)
-
         if arp_udp == "0806":
             #print("arp")
             extracteur_ARP(file_bin, decalage_lec, id, id_exec)
@@ -328,8 +336,8 @@ def extracteur(cursor, id_exec):
         f21 = fields[20]
         f22 = fields[21]
 
-        valudp = (date_exec, benches[0], benches[3], size, macs[1], macs[0], f1, f2, f3, f4, f5, f6, f7, ip_s, ip_d, f8, f9, f10, f11, f12, f13, f14, f15, f16, 
-                f17, f18, f19, f20, f21, f22, " ", " ", FT6, " ", id, id_exec) #on lit que jusqu'au field 30, rajouter field 33_34_35 et field 32
+        valudp = (date_exec, benches[0][0], benches[0][3], size, macs[0][1], macs[0][0], f1, f2, f3, f4, f5, f6, f7, ip_s, ip_d, f8, f9, f10, f11, f12, f13, f14, f15, f16, 
+                f17, f18, f19, f20, f21, f22, FT1, " ", FT6, " ", id, id_exec) #on lit que jusqu'au field 30, rajouter field 33_34_35 et field 32
 
         sql = 'INSERT INTO udp1(frame_date, bench_3, bench_5, frame_size, adresse_mac_dest, adresse_mac_source, Field_1, Field_2, Field_3, Field_4, Field_5, Field_6, Field_7, adresse_ip_source, adresse_ip_dest, Field_9, Field_10, Field_11, Field_14, Field_16, Field_17, Field_18, Field_20, Field_21, Field_23, Field_25, Field_26, Field_28, Field_29, Field_30, Field_32, Field_33_34_35, ft_6, packet_date, id_test, id_exec) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
 
@@ -344,7 +352,7 @@ def extracteur_ARP(fic, decalage, id_num, id_exec_arp):
     macs = lire_addr_mac(fic, decalage)
     mac_s = macs[0]
     mac_d = macs[1]
-    date_frame = packet_date(fic, decalage)
+    #date_frame = packet_date(fic, decalage)
     fields = lire_fields(fic, decalage)
 
 
