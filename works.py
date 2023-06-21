@@ -7,24 +7,27 @@ from mysql import connector
 from fonctions import *
 import ft_fonctions
 import sys #nécessaire pour récupérer les paramètres en ligne de commande
+import os
 
 if __name__ == "__main__":
+    print("ok")
 
     if len(sys.argv) < 1:
         print("Error : file path or name test required")
         exit()
     elif len(sys.argv) < 3:
-        try: #on vérifie si le paramètre est un chemin ou le nom d'un test
-            open(sys.argv[1], "r")        
+
+        if os.path.isdir(sys.argv[1]):
+            print(os.path.isdir(sys.argv[1]))
             data = lire_rep(sys.argv[1]) #Si le paramètre est un chemin, on lit le fichier rep et on extrait les données nécessaires
             nom_test = data['name']
             date_test = data['date']
             is_path = True
-
-        except AttributeError: #Si on obtient AttributeError, alors le paramètre n'est pas un chemin, ou le fichier n'existe pas. Donc le paramètre est considéré comme étant le nom du test
+        else:
             date_test = str(datetime.datetime.now()) #On récupère la date d'aujourd'hui
             valtest2 = (sys.argv[1], date_test)#on met en Tuple le couple nom_test et date_test
-            is_path = False
+            is_path = False  
+
     else:
          print("Error : too much parameter (file-path, test-name)")
          exit()
