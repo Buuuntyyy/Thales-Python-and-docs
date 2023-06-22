@@ -4,18 +4,13 @@ import time
 import struct
 import threading
 from mysql import connector
+import ft_fonctions as ftf
 
 #path = "C:\\Users\\barfl\\Desktop\\saé_thalès\\ethernet.result_data"
 path = "C:\\Users\\barfl\\Desktop\\test1\\ethernet.result_data"
 
 path_out = "C:\\Users\\barfl\\Desktop\\output.txt"
 path2 = "C:\\Users\\Utlisateur\\Desktop\\programmation\\thales\\ethernet.result_data"
-
-
-def transform_FT():
-    fic = open("C:\\Users\\barfl\\Desktop\\saé_thalès\\ethernet.result_data", "r")
-    to_transform = fic.readlines()
-    fic.close()
     
 def read_binary_file_bits(path) -> list:
     with open(path, 'rb') as f:
@@ -75,6 +70,21 @@ def taille_paquet(liste, decalage) -> int:
     array = readBitsASoctet(liste, decalage + 24, decalage + 28)
     array = array[::-1]
     return conv2dec(array)
+
+def f33_34_35(liste, decalage):
+    f = []
+    f.append(liste[decalage +653:decalage +655])
+    f.append(liste[decalage +654:decalage +657])
+    f.append(liste[decalage +656:decalage +659])
+    ch = ""
+    for i in range(0, len(f[0])):
+        ch+= str(f[0][i])
+    for i in range(0, len(f[1])):
+        ch+= str(f[1][i])
+    for i in range(0, len(f[2])):
+        ch+= str(f[2][i])
+    return ch
+
 
 def lire_addr_mac(liste, decalage) -> int: #octet 28 à 40
     bdata = readBitsASoctet(liste, decalage + 28, decalage + 40)
@@ -214,6 +224,30 @@ def lire_FT(liste, decalage) -> list:
 
     return FT_val
 
+def FT_active(FT_val):
+    for element in ftf.FT0:
+        if FT_val[0] == element:
+            FT_val[0] = element
+    for element in ftf.FT1:
+        if FT_val[1] == element:
+            FT_val[1] = element
+    for element in ftf.FT2:
+        if FT_val[2] == element:
+            FT_val[2] = element
+    for element in ftf.FT3:
+        if FT_val[3] == element:
+            FT_val[3] = element
+    for element in ftf.FT4:
+        if FT_val[4] == element:
+            FT_val[4] = element
+    for element in ftf.FT5:
+        if FT_val[5] == element:
+            FT_val[5] = element
+    for element in ftf.FT6:
+        if FT_val[6] == element:
+            FT_val[6] = element
+    return FT_val
+
 def lire_FT6(FT_liste, fields_liste, liste) -> str:
     FT6 = []
     FT6.append(FT_liste[6])
@@ -299,7 +333,9 @@ def extracteur(cursor, id_exec):
         ip_d = ips[1]
         fields = lire_fields(file_bin, decalage_lec)
         FT = lire_FT(file_bin, decalage_lec)
+        FT = FT_active(FT)
         FT6 = lire_FT6(FT, fields, file_bin)
+        f33to35 = f33_34_35(file_bin, decalage_lec)
         print(FT6)
         
         FT1 = ""
@@ -324,21 +360,21 @@ def extracteur(cursor, id_exec):
         f8 = fields[7]
         f9 = fields[8]
         f10 = fields[9]
-        f11= fields[10]
+        f11= FT[6]
         f12 = fields[11]
-        f13 = fields[12]
-        f14 = fields[13]
+        f13 = FT[5]
+        f14 = FT[2]
         f15 = fields[14]
         f16 = fields[15]
         f17 = fields[16]
         f18 = fields[17]
         f19 = fields[18]
-        f20 = fields[19]
-        f21 = fields[20]
+        f20 = FT[3]
+        f21 = FT[4]
         f22 = fields[21]
 
         valudp = (date_exec, benches[0][0], benches[0][3], size, macs[0][1], macs[0][0], f1, f2, f3, f4, f5, f6, f7, ip_s, ip_d, f8, f9, f10, f11, f12, f13, f14, f15, f16, 
-                f17, f18, f19, f20, f21, f22, FT1, " ", FT6, " ", id, id_exec) #on lit que jusqu'au field 30, rajouter field 33_34_35 et field 32
+                f17, f18, f19, f20, f21, f22, FT1, f33to35, FT6, " ", id, id_exec) #on lit que jusqu'au field 30, rajouter field 33_34_35 et field 32
 
         sql = 'INSERT INTO udp1(frame_date, bench_3, bench_5, frame_size, adresse_mac_dest, adresse_mac_source, Field_1, Field_2, Field_3, Field_4, Field_5, Field_6, Field_7, adresse_ip_source, adresse_ip_dest, Field_9, Field_10, Field_11, Field_14, Field_16, Field_17, Field_18, Field_20, Field_21, Field_23, Field_25, Field_26, Field_28, Field_29, Field_30, Field_32, Field_33_34_35, ft_6, packet_date, id_test, id_exec) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
 
